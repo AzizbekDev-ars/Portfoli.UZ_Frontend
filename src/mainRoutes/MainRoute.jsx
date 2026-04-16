@@ -8,6 +8,11 @@ import DashboardLayout from '../client/dashboard/DashboardLayout'
 import Home from '../client/dashboard/pages/Home'
 import Visitors from '../client/dashboard/pages/Visitors'
 import Messages from '../client/dashboard/pages/Messages'
+import Certificates from '../client/dashboard/pages/Certificates'
+import Experiences from '../client/dashboard/pages/Experiences'
+import Projects from '../client/dashboard/pages/Projects'
+import Settings from '../client/dashboard/pages/Settings'
+import CV from '../client/dashboard/pages/CV'
 
 const MainRoute = () => {
   return (
@@ -28,11 +33,11 @@ const MainRoute = () => {
         <Route index element={<Home />} />
         <Route path="visitors" element={<Visitors />} />
         <Route path="messages" element={<Messages />} />
-        <Route path="certificates" element={<div className="text-slate-800 dark:text-white">Certificates Page (Tez kunda...)</div>} />
-        <Route path="experiences" element={<div className="text-slate-800 dark:text-white">Experiences Page (Tez kunda...)</div>} />
-        <Route path="projects" element={<div className="text-slate-800 dark:text-white">Projects Page (Tez kunda...)</div>} />
-        <Route path="cv" element={<div className="text-slate-800 dark:text-white">CV Page (Tez kunda...)</div>} />
-        <Route path="settings" element={<div className="text-slate-800 dark:text-white">Settings Page (Tez kunda...)</div>} />
+        <Route path="certificates" element={<Certificates />} />
+        <Route path="experiences" element={<Experiences />} />
+        <Route path="projects" element={<Projects />} />
+        <Route path="cv" element={<CV />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
     </Routes>
