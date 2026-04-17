@@ -5,6 +5,7 @@ import Register from '../client/auth/Register'
 
 import ProtectedRoute from '../Protect/ProtectedRoute'
 import DashboardLayout from '../client/dashboard/DashboardLayout'
+import PortfolioRender from '../portfolio/PortfolioRender'
 import Home from '../client/dashboard/pages/Home'
 import Visitors from '../client/dashboard/pages/Visitors'
 import Messages from '../client/dashboard/pages/Messages'
@@ -39,6 +40,9 @@ const MainRoute = () => {
         <Route path="cv" element={<CV />} />
         <Route path="settings" element={<Settings />} />
       </Route>
+
+      {/* PORTFOLIO ROUTE (PUBLIC) */}
+      <Route path="/:username" element={<PortfolioRender />} />
 
     </Routes>
   )

@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
 import { useNavigate } from 'react-router-dom';
+import PaymentModal from '../components/PaymentModal';
+import UpgradePlaceholder from '../components/UpgradePlaceholder';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
@@ -32,6 +34,31 @@ const Visitors = () => {
   
   const [visitors, setVisitors] = useState(initialVisitors);
   const [search, setSearch] = useState('');
+  
+  const [isPro, setIsPro] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("portfolioSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setIsPro(!!parsed.isPro);
+    } else {
+      setIsPro(false);
+    }
+  }, []);
+
+  const handlePaymentSuccess = () => {
+    setIsPaymentModalOpen(false);
+    setIsPro(true);
+    const saved = localStorage.getItem("portfolioSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      parsed.isPro = true;
+      localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
+    }
+    alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+  };
   
   // Filter States
   const [sortDate, setSortDate] = useState('desc');
@@ -131,6 +158,23 @@ const Visitors = () => {
     const d = new Date(ds);
     return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
   };
+
+  if (!isPro) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
+        <UpgradePlaceholder 
+          title="Tashriflar Statistikasi (PRO)" 
+          description="Sizning portfolio sahifangizga kimlar kirmoqda, qaysi shahardan ekanligi va grafiklarni kuzatish uchun PRO tarifiga o'ting." 
+          onUpgradeClick={() => setIsPaymentModalOpen(true)} 
+        />
+        <PaymentModal 
+          isOpen={isPaymentModalOpen} 
+          onClose={() => setIsPaymentModalOpen(false)} 
+          onSuccess={handlePaymentSuccess} 
+        />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div 

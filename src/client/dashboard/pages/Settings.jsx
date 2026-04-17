@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
+import PaymentModal from '../components/PaymentModal';
 
 // Icons
 const SaveIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>;
@@ -28,7 +29,10 @@ const initialSettingsData = {
     current: "",
     new: "",
     confirm: ""
-  }
+  },
+  selectedDesign: "Zamonaviy",
+  designChangedCount: 0,
+  isPro: false
 };
 
 const Settings = () => {
@@ -37,6 +41,20 @@ const Settings = () => {
   const [settings, setSettings] = useState(initialSettingsData);
   const [initialSettingsStr, setInitialSettingsStr] = useState(JSON.stringify(initialSettingsData));
   const [hasChanges, setHasChanges] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Load from local storage initially
+  useEffect(() => {
+    const saved = localStorage.getItem("portfolioSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // migrate missing fields
+      if (parsed.isPro === undefined) parsed.isPro = false;
+      if (parsed.designChangedCount === undefined) parsed.designChangedCount = 0;
+      setSettings(parsed);
+      setInitialSettingsStr(JSON.stringify(parsed));
+    }
+  }, []);
 
   // Check for changes whenever settings changes
   useEffect(() => {
@@ -96,10 +114,42 @@ const Settings = () => {
 
   const handleSave = () => {
     if (!hasChanges) return;
-    // Psevdo-save
-    setInitialSettingsStr(JSON.stringify(settings));
+    
+    let updatedSettings = { ...settings };
+    const originalSettings = JSON.parse(initialSettingsStr);
+    
+    // If they changed the design, increment the count
+    if (updatedSettings.selectedDesign !== originalSettings.selectedDesign) {
+       updatedSettings.designChangedCount = (updatedSettings.designChangedCount || 0) + 1;
+    }
+    
+    setSettings(updatedSettings);
+    setInitialSettingsStr(JSON.stringify(updatedSettings));
     setHasChanges(false);
+    localStorage.setItem("portfolioSettings", JSON.stringify(updatedSettings));
     alert("Sozlamalar muvaffaqiyatli saqlandi!");
+  };
+
+  const handleDesignSelect = (design) => {
+    if (design === settings.selectedDesign) return;
+    
+    const originalSettings = JSON.parse(initialSettingsStr);
+    // If they already changed the design at least once, and are not pro
+    if (!settings.isPro && originalSettings.designChangedCount >= 1 && design !== originalSettings.selectedDesign) {
+      setIsPaymentModalOpen(true);
+      return;
+    }
+    
+    setSettings(prev => ({ ...prev, selectedDesign: design }));
+  };
+
+  const handlePaymentSuccess = () => {
+    setIsPaymentModalOpen(false);
+    const upgraded = { ...settings, isPro: true };
+    setSettings(upgraded);
+    setInitialSettingsStr(JSON.stringify(upgraded));
+    localStorage.setItem("portfolioSettings", JSON.stringify(upgraded));
+    alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
   };
 
   return (
@@ -107,7 +157,7 @@ const Settings = () => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="pb-12 h-full flex flex-col"
+      className="pb-24 flex flex-col"
     >
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-8 mt-2">
@@ -349,25 +399,39 @@ const Settings = () => {
         <div className="flex flex-col gap-8">
           
           {/* PRO PLAN ADVERTISEMENT */}
-          <div className="rounded-3xl p-6 md:p-8 relative overflow-hidden bg-gradient-to-br from-[#1A1F2C] to-black dark:from-indigo-900/40 dark:to-black border border-indigo-500/20 shadow-xl shadow-indigo-900/20 group">
-             {/* Decorative glows */}
-             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/30 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-colors duration-700"></div>
-             <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
-             
-             <div className="relative z-10 flex flex-col items-center text-center">
-               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
-                 <CrownIcon />
-               </div>
-               <h3 className="text-xl font-black text-white uppercase tracking-wider mb-2">PRO Ta'rifiga O'ting</h3>
-               <p className="text-sm text-slate-300 leading-relaxed mb-6">
-                 Shaxsiy domeningizni ulang, Portfolio-ni premium andozalar orqali shaxsiylashtiring, va limitsiz xizmatlardan foydalaning.
-               </p>
+          {!settings.isPro ? (
+            <div className="rounded-3xl p-6 md:p-8 relative overflow-hidden bg-gradient-to-br from-[#1A1F2C] to-black dark:from-indigo-900/40 dark:to-black border border-indigo-500/20 shadow-xl shadow-indigo-900/20 group">
+               {/* Decorative glows */}
+               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/30 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-colors duration-700"></div>
+               <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
                
-               <button className="w-full py-3.5 rounded-xl bg-white text-black font-black uppercase text-sm tracking-widest hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                 Tarifni Yangilash
-               </button>
-             </div>
-          </div>
+               <div className="relative z-10 flex flex-col items-center text-center">
+                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
+                   <CrownIcon />
+                 </div>
+                 <h3 className="text-xl font-black text-white uppercase tracking-wider mb-2">PRO Ta'rifiga O'ting</h3>
+                 <p className="text-sm text-slate-300 leading-relaxed mb-6">
+                   Mijozlar tashrifini kuzating, CV ni aktivlashtiring va xohlagancha dizayn almashtiring.
+                 </p>
+                 
+                 <button type="button" onClick={() => setIsPaymentModalOpen(true)} className="w-full py-3.5 rounded-xl bg-white text-black font-black uppercase text-sm tracking-widest hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                   Tarifni Yangilash ($3)
+                 </button>
+               </div>
+            </div>
+          ) : (
+            <div className="rounded-3xl p-6 md:p-8 relative overflow-hidden bg-gradient-to-br from-emerald-900/40 to-black border border-emerald-500/20 shadow-xl shadow-emerald-900/20 group">
+               <div className="relative z-10 flex flex-col items-center text-center">
+                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-500/30">
+                   <CrownIcon />
+                 </div>
+                 <h3 className="text-xl font-black text-white uppercase tracking-wider mb-2">Siz PRO Tarifidasiz 🎉</h3>
+                 <p className="text-sm text-slate-300 leading-relaxed">
+                   Barcha imkoniyatlar (Tashriflar, CV, dizaynlar) aktiv.
+                 </p>
+               </div>
+            </div>
+          )}
 
           {/* PASSWORD CHANGE */}
           <div className="bg-white dark:bg-black p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm">
@@ -416,6 +480,52 @@ const Settings = () => {
 
         </div>
       </div>
+
+      {/* 3. PORTFOLIO DESIGN SELECTION */}
+      <div className="mt-8 bg-white dark:bg-black p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden">
+         <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Portfolio Dizaynini Tanlash</h2>
+         <p className="text-sm text-slate-500 mb-6">O'zingizga yoqqan dizayn uslubini tanlang. Qolgan barcha ma'lumotlar avtomatik tarzda moslashadi.</p>
+         
+         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {['Oddiy', 'Zamonaviy', 'Maxsus', 'Creative', 'Animatsion'].map((design) => (
+              <div
+                key={design}
+                onClick={() => handleDesignSelect(design)}
+                className={`cursor-pointer relative flex flex-col items-center justify-center p-6 rounded-3xl border-2 transition-all min-h-[180px] shadow-sm hover:shadow-md ${
+                  settings.selectedDesign === design 
+                    ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10' 
+                    : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:border-indigo-300 dark:hover:border-indigo-500/30'
+                }`}
+              >
+                 {/* Card Decoration Element */}
+                 <div className={`w-14 h-14 mb-4 rounded-2xl flex items-center justify-center shadow-sm ${settings.selectedDesign === design ? 'bg-indigo-500 text-white shadow-indigo-500/40' : 'bg-white dark:bg-black text-slate-400 border border-slate-200 dark:border-white/10'}`}>
+                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.315 48.315 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                   </svg>
+                 </div>
+
+                 {settings.selectedDesign === design && (
+                   <div className="absolute top-4 right-4 text-indigo-500 bg-white dark:bg-black rounded-full shadow-sm">
+                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path></svg>
+                   </div>
+                 )}
+                 <span className={`text-base font-black uppercase tracking-wider text-center ${
+                   settings.selectedDesign === design 
+                     ? 'text-indigo-600 dark:text-indigo-400' 
+                     : 'text-slate-700 dark:text-slate-300'
+                 }`}>
+                   {design}
+                 </span>
+              </div>
+            ))}
+         </div>
+      </div>
+      
+      <PaymentModal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)} 
+        onSuccess={handlePaymentSuccess} 
+      />
     </motion.div>
   );
 };
