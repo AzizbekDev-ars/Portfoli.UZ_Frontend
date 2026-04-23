@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import PaymentModal from '../components/PaymentModal';
+import UpgradePlaceholder from '../components/UpgradePlaceholder';
 
 // Mock Data (Global Context dan keladigan ma'lumotlar o'rnida)
 const mockData = {
@@ -35,6 +37,30 @@ const mockData = {
 
 const CV = () => {
   const [selectedDesign, setSelectedDesign] = useState('modern');
+  const [isPro, setIsPro] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("portfolioSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setIsPro(!!parsed.isPro);
+    } else {
+      setIsPro(false);
+    }
+  }, []);
+
+  const handlePaymentSuccess = () => {
+    setIsPaymentModalOpen(false);
+    setIsPro(true);
+    const saved = localStorage.getItem("portfolioSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      parsed.isPro = true;
+      localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
+    }
+    alert("Tabriklaymiz! Siz endi PRO tarifidasiz \uD83C\uDF89");
+  };
 
   const designs = [
     { id: 'modern', name: 'Zamonaviy', desc: 'Ko\'k rangli gradient va toza shriftlar' },
@@ -43,6 +69,7 @@ const CV = () => {
     { id: 'ultra-formal', name: 'O\'ta Rasmiy', desc: 'Faqat oq-qora, serif shriftlar (Times)' }
   ];
 
+  
   /* 
     Dizayn konfiguratsiyasi (Tailwind classlari bo'yicha). 
     A4 format: width va height belgilangan (aspect ratio: 1 / 1.414). 
@@ -95,6 +122,23 @@ const CV = () => {
   };
 
   const t = getThemeClasses();
+
+  if (!isPro) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
+        <UpgradePlaceholder 
+          title="Rezyume (CV) Yaratish (PRO)" 
+          description="O'zingizning professional rezyumengizni bir qancha zamonaviy dizaynlarda avtomatik yaratish hamda PDF formatda yuklab olish imkoniyatiga ega bo'lish uchun PRO tarifiga o'ting." 
+          onUpgradeClick={() => setIsPaymentModalOpen(true)} 
+        />
+        <PaymentModal 
+          isOpen={isPaymentModalOpen} 
+          onClose={() => setIsPaymentModalOpen(false)} 
+          onSuccess={handlePaymentSuccess} 
+        />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div 

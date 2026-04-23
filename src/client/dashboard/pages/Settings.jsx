@@ -127,6 +127,7 @@ const Settings = () => {
     setInitialSettingsStr(JSON.stringify(updatedSettings));
     setHasChanges(false);
     localStorage.setItem("portfolioSettings", JSON.stringify(updatedSettings));
+    window.dispatchEvent(new Event('portfolioSettingsUpdate'));
     alert("Sozlamalar muvaffaqiyatli saqlandi!");
   };
 
@@ -149,7 +150,19 @@ const Settings = () => {
     setSettings(upgraded);
     setInitialSettingsStr(JSON.stringify(upgraded));
     localStorage.setItem("portfolioSettings", JSON.stringify(upgraded));
+    window.dispatchEvent(new Event('portfolioSettingsUpdate'));
     alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+  };
+
+  const handleCancelPro = () => {
+    if (window.confirm("Haqiqatan ham PRO tarifingizni bekor qilmoqchimisiz?")) {
+      const downgraded = { ...settings, isPro: false };
+      setSettings(downgraded);
+      setInitialSettingsStr(JSON.stringify(downgraded));
+      localStorage.setItem("portfolioSettings", JSON.stringify(downgraded));
+      window.dispatchEvent(new Event('portfolioSettingsUpdate'));
+      alert("PRO tarifingiz bekor qilindi.");
+    }
   };
 
   return (
@@ -426,9 +439,13 @@ const Settings = () => {
                    <CrownIcon />
                  </div>
                  <h3 className="text-xl font-black text-white uppercase tracking-wider mb-2">Siz PRO Tarifidasiz 🎉</h3>
-                 <p className="text-sm text-slate-300 leading-relaxed">
+                 <p className="text-sm text-slate-300 leading-relaxed mb-6">
                    Barcha imkoniyatlar (Tashriflar, CV, dizaynlar) aktiv.
                  </p>
+                 
+                 <button type="button" onClick={handleCancelPro} className="w-full py-3.5 rounded-xl bg-red-500/10 text-red-500 font-black uppercase text-sm tracking-widest hover:bg-red-500 hover:text-white border border-red-500/30 transition-colors">
+                   Tarifni Bekor Qilish
+                 </button>
                </div>
             </div>
           )}
@@ -483,7 +500,14 @@ const Settings = () => {
 
       {/* 3. PORTFOLIO DESIGN SELECTION */}
       <div className="mt-8 bg-white dark:bg-black p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden">
-         <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Portfolio Dizaynini Tanlash</h2>
+         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+           <h2 className="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">Portfolio Dizaynini Tanlash</h2>
+           {!settings.isPro && (
+             <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-bold w-fit border border-amber-200 dark:border-amber-500/20">
+               <CrownIcon /> Bepul 1 marta o'zgartirish mumkin
+             </div>
+           )}
+         </div>
          <p className="text-sm text-slate-500 mb-6">O'zingizga yoqqan dizayn uslubini tanlang. Qolgan barcha ma'lumotlar avtomatik tarzda moslashadi.</p>
          
          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
