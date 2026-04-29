@@ -29,54 +29,54 @@ const Home = () => {
       className="space-y-6 pb-12"
     >
       {/* --- CARDS SECTION --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         
         <div 
           onDoubleClick={() => navigate('/dashboard/visitors')}
-          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
+          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-3 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
         >
-          <div className="w-14 h-14 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
              <EyeIcon />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.dashboard?.home?.visits || 'Umumiy tashriflar'}</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">12,483</p>
+          <div className="min-w-0 w-full">
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{t.dashboard?.home?.visits || 'Umumiy tashriflar'}</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">12,483</p>
           </div>
         </div>
 
         <div 
           onDoubleClick={() => navigate('/dashboard/visitors')}
-          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
+          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-3 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
         >
-          <div className="w-14 h-14 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
              <UsersIcon />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.dashboard?.home?.newVisitors || 'Yangi tashriflar'}</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">4,209</p>
+          <div className="min-w-0 w-full">
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{t.dashboard?.home?.newVisitors || 'Yangi tashriflar'}</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">4,209</p>
           </div>
         </div>
 
         <div 
           onDoubleClick={() => navigate('/dashboard/messages')}
-          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
+          className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-3 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4 hover:scale-105 transition-transform duration-300 cursor-pointer select-none"
         >
-          <div className="w-14 h-14 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center shrink-0">
              <MailIcon />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.dashboard?.home?.unread || "O'qilmagan xabarlar"}</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">14</p>
+          <div className="min-w-0 w-full">
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{t.dashboard?.home?.unread || "O'qilmagan xabarlar"}</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">14</p>
           </div>
         </div>
 
-        <div className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-4 hover:scale-105 transition-transform duration-300">
-          <div className="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+        <div className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-3 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4 hover:scale-105 transition-transform duration-300">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
              <DownloadIcon />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.dashboard?.home?.cvDownloads || "CV yuklab olingan"}</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">356</p>
+          <div className="min-w-0 w-full">
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{t.dashboard?.home?.cvDownloads || "CV yuklab olingan"}</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">356</p>
           </div>
         </div>
 

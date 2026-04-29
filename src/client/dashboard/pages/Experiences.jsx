@@ -306,28 +306,28 @@ const Experiences = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex sm:flex-col gap-3 shrink-0 w-full sm:w-auto">
+                <div className="flex sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                    <button 
                      onClick={() => handleToggleCV(exp.id)}
-                     className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition-colors font-semibold text-sm ${
+                     className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg border transition-colors font-bold text-[10px] sm:text-xs uppercase tracking-wider ${
                        exp.isCV 
                          ? 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' 
                          : 'bg-white border-slate-200 text-slate-500 dark:bg-black dark:border-white/10 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
                      }`}
                    >
-                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                      <span>{exp.isCV ? "CV da bor" : "CV ga qo'shish"}</span>
                    </button>
                    <button 
                      onClick={() => handleOpenEdit(exp)}
-                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors font-semibold text-sm"
+                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors font-bold text-[10px] sm:text-xs uppercase tracking-wider"
                    >
                      <EditIcon />
                      <span>Yangilash</span>
                    </button>
                    <button 
                      onClick={() => handleDelete(exp.id)}
-                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors font-semibold text-sm"
+                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors font-bold text-[10px] sm:text-xs uppercase tracking-wider"
                    >
                      <TrashIcon />
                      <span>O'chirish</span>

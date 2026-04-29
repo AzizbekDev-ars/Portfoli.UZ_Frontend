@@ -121,6 +121,29 @@ const CV = () => {
     }
   };
 
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        // Mobile: calculate scale to fit the 800px width into the screen width (minus padding)
+        const newScale = (width - 32) / 800; 
+        setScale(newScale);
+      } else if (width < 1024) {
+        // Tablet: 
+        const newScale = (width - 100) / 800;
+        setScale(newScale);
+      } else {
+        setScale(1);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const t = getThemeClasses();
 
   if (!isPro) {
@@ -190,125 +213,135 @@ const CV = () => {
       {/* A4 CV PREVIEW CONTAINER */}
       <div className="w-full flex justify-center bg-slate-100 dark:bg-[#0a0a0a] rounded-3xl p-4 sm:p-12 border border-slate-200 dark:border-white/10">
         
-        {/* A4 Page Document Layout */}
+        {/* Scaling Wrapper for Mobile */}
         <div 
-          className={`w-full max-w-[800px] min-h-[1131px] shadow-2xl flex flex-col md:flex-row ${t.wrapper}`} 
+          className="origin-top transition-all duration-300 flex justify-center w-full"
+          style={{ 
+            transform: `scale(${scale})`,
+            height: `calc(1131px * ${scale})`,
+            minHeight: scale < 1 ? `calc(1131px * ${scale} + 50px)` : '1131px'
+          }}
         >
-           {/* LEFT COLUMN */}
-           <div className={`w-full md:w-[35%] flex flex-col ${t.leftCol}`}>
-             {/* Photo */}
-             <div className="flex justify-center mb-8">
-                {selectedDesign === 'ultra-formal' ? (
-                  <img src={mockData.user.avatar} alt="Profile" className="w-32 h-40 object-cover border-4 border-black grayscale" />
-                ) : (
-                  <img src={mockData.user.avatar} alt="Profile" className={`w-40 h-40 object-cover rounded-full ${selectedDesign === 'creative' ? 'border-4 border-white shadow-xl' : 'border-4 border-white/20'}`} />
-                )}
-             </div>
+          {/* A4 Page Document Layout - Forced Horizontal to prevent wrap */}
+          <div 
+            className={`w-[800px] min-h-[1131px] shadow-2xl flex shrink-0 ${t.wrapper}`} 
+          >
+             {/* LEFT COLUMN */}
+             <div className={`w-[35%] flex flex-col ${t.leftCol}`}>
+               {/* Photo */}
+               <div className="flex justify-center mb-8">
+                  {selectedDesign === 'ultra-formal' ? (
+                    <img src={mockData.user.avatar} alt="Profile" className="w-32 h-40 object-cover border-4 border-black grayscale" />
+                  ) : (
+                    <img src={mockData.user.avatar} alt="Profile" className={`w-40 h-40 object-cover rounded-full ${selectedDesign === 'creative' ? 'border-4 border-white shadow-xl' : 'border-4 border-white/20'}`} />
+                  )}
+               </div>
 
-             {/* Personal Info */}
-             <div className="mb-10">
-               <h4 className={`text-sm font-black uppercase tracking-widest mb-4 ${selectedDesign === 'modern' ? 'text-white' : ''} ${selectedDesign === 'ultra-formal' ? 'border-b-2 border-black pb-1' : 'border-b border-white/20 pb-2'}`}>
-                 Bog'lanish
-               </h4>
-               <ul className="flex flex-col gap-4 text-sm">
-                 {mockData.user.contacts.map((contact, i) => (
-                   <li key={i} className="flex flex-col">
-                     <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>{contact.type}</span>
-                     <span>{contact.link}</span>
-                   </li>
-                 ))}
-                 <li className="flex flex-col mt-2">
-                     <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>Manzil</span>
-                     <span>{mockData.user.address}</span>
-                 </li>
-               </ul>
-             </div>
-
-             {/* Certificates */}
-             <div>
-                <h4 className={`text-sm font-black uppercase tracking-widest mb-4 ${selectedDesign === 'modern' ? 'text-white' : ''} ${selectedDesign === 'ultra-formal' ? 'border-b-2 border-black pb-1' : 'border-b border-white/20 pb-2'}`}>
-                 Sertifikatlar
-               </h4>
-               <ul className="flex flex-col gap-5 text-sm">
-                 {mockData.certificates.map(cert => (
-                   <li key={cert.id}>
-                     <div className={`font-bold ${selectedDesign === 'ultra-formal' ? '' : selectedDesign === 'formal' ? 'text-slate-800' : 'text-white'}`}>
-                       {cert.title}
-                     </div>
-                     <div className="opacity-80 text-xs mt-1">{cert.provider}</div>
-                     <div className="opacity-60 text-xs italic">{cert.date}</div>
-                   </li>
-                 ))}
-               </ul>
-             </div>
-
-           </div>
-
-           {/* RIGHT COLUMN */}
-           <div className={`w-full md:w-[65%] flex flex-col ${t.rightCol}`}>
-              
-              {/* Header inside Right Column */}
-              <div className="mb-10">
-                <h2 className={t.name}>
-                  {mockData.user.firstName} {mockData.user.lastName}
-                </h2>
-                <div className={`text-xl tracking-wide ${t.accent}`}>{mockData.user.profession}</div>
-              </div>
-
-              {/* Profile / About */}
-              <div className="mb-10">
-                <h3 className={t.sectionTitle}>Profil</h3>
-                <p className="leading-relaxed text-sm">
-                  {mockData.user.aboutMe}
-                </p>
-              </div>
-
-              {/* Experience */}
-              <div className="mb-10">
-                <h3 className={t.sectionTitle}>Ish Tajribasi</h3>
-                <div className="flex flex-col gap-2">
-                   {mockData.experiences.map((exp) => (
-                     <div key={exp.id} className={t.itemBorder}>
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className={`text-lg ${t.accent}`}>{exp.role}</h4>
-                          <span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600 shrink-0">
-                            {exp.startDate} - {exp.endDate}
-                          </span>
-                        </div>
-                        <div className={`text-sm font-bold mb-2 ${selectedDesign === 'ultra-formal' ? '' : 'text-slate-500'}`}>
-                          {exp.company}
-                        </div>
-                        <p className="text-sm leading-relaxed">
-                          {exp.description}
-                        </p>
-                     </div>
+               {/* Personal Info */}
+               <div className="mb-10">
+                 <h4 className={`text-sm font-black uppercase tracking-widest mb-4 ${selectedDesign === 'modern' ? 'text-white' : ''} ${selectedDesign === 'ultra-formal' ? 'border-b-2 border-black pb-1' : 'border-b border-white/20 pb-2'}`}>
+                   Bog'lanish
+                 </h4>
+                 <ul className="flex flex-col gap-4 text-sm">
+                   {mockData.user.contacts.map((contact, i) => (
+                     <li key={i} className="flex flex-col">
+                       <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>{contact.type}</span>
+                       <span>{contact.link}</span>
+                     </li>
                    ))}
-                </div>
-              </div>
+                   <li className="flex flex-col mt-2">
+                       <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>Manzil</span>
+                       <span>{mockData.user.address}</span>
+                   </li>
+                 </ul>
+               </div>
 
-              {/* Projects */}
-              <div>
-                <h3 className={t.sectionTitle}>Loyihalar</h3>
-                <div className="flex flex-col gap-2">
-                   {mockData.projects.map((proj) => (
-                     <div key={proj.id} className={t.itemBorder}>
-                        <div className="flex justify-between items-center mb-1">
-                          <h4 className={`text-md ${t.accent}`}>{proj.title}</h4>
-                          {proj.demoLink && (
-                            <span className="text-xs text-indigo-600 underline">
-                              {proj.demoLink}
+               {/* Certificates */}
+               <div>
+                  <h4 className={`text-sm font-black uppercase tracking-widest mb-4 ${selectedDesign === 'modern' ? 'text-white' : ''} ${selectedDesign === 'ultra-formal' ? 'border-b-2 border-black pb-1' : 'border-b border-white/20 pb-2'}`}>
+                   Sertifikatlar
+                 </h4>
+                 <ul className="flex flex-col gap-5 text-sm">
+                   {mockData.certificates.map(cert => (
+                     <li key={cert.id}>
+                       <div className={`font-bold ${selectedDesign === 'ultra-formal' ? '' : selectedDesign === 'formal' ? 'text-slate-800' : 'text-white'}`}>
+                         {cert.title}
+                       </div>
+                       <div className="opacity-80 text-xs mt-1">{cert.provider}</div>
+                       <div className="opacity-60 text-xs italic">{cert.date}</div>
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+
+             </div>
+
+             {/* RIGHT COLUMN */}
+             <div className={`w-[65%] flex flex-col ${t.rightCol}`}>
+                
+                {/* Header inside Right Column */}
+                <div className="mb-10">
+                  <h2 className={t.name}>
+                    {mockData.user.firstName} {mockData.user.lastName}
+                  </h2>
+                  <div className={`text-xl tracking-wide ${t.accent}`}>{mockData.user.profession}</div>
+                </div>
+
+                {/* Profile / About */}
+                <div className="mb-10">
+                  <h3 className={t.sectionTitle}>Profil</h3>
+                  <p className="leading-relaxed text-sm">
+                    {mockData.user.aboutMe}
+                  </p>
+                </div>
+
+                {/* Experience */}
+                <div className="mb-10">
+                  <h3 className={t.sectionTitle}>Ish Tajribasi</h3>
+                  <div className="flex flex-col gap-2">
+                     {mockData.experiences.map((exp) => (
+                       <div key={exp.id} className={t.itemBorder}>
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className={`text-lg ${t.accent}`}>{exp.role}</h4>
+                            <span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600 shrink-0">
+                              {exp.startDate} - {exp.endDate}
                             </span>
-                          )}
-                        </div>
-                        <p className="text-sm leading-relaxed mt-1">
-                          {proj.description}
-                        </p>
-                     </div>
-                   ))}
+                          </div>
+                          <div className={`text-sm font-bold mb-2 ${selectedDesign === 'ultra-formal' ? '' : 'text-slate-500'}`}>
+                            {exp.company}
+                          </div>
+                          <p className="text-sm leading-relaxed">
+                            {exp.description}
+                          </p>
+                       </div>
+                     ))}
+                  </div>
                 </div>
-              </div>
 
-           </div>
+                {/* Projects */}
+                <div>
+                  <h3 className={t.sectionTitle}>Loyihalar</h3>
+                  <div className="flex flex-col gap-2">
+                     {mockData.projects.map((proj) => (
+                       <div key={proj.id} className={t.itemBorder}>
+                          <div className="flex justify-between items-center mb-1">
+                            <h4 className={`text-md ${t.accent}`}>{proj.title}</h4>
+                            {proj.demoLink && (
+                              <span className="text-xs text-indigo-600 underline">
+                                {proj.demoLink}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm leading-relaxed mt-1">
+                            {proj.description}
+                          </p>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+
+             </div>
+          </div>
         </div>
       </div>
 

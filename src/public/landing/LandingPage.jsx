@@ -25,15 +25,19 @@ const LandingPage = () => {
          <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-500/20 dark:bg-purple-600/20 blur-[120px]"></div>
       </div>
 
-      <Hero t={t} />
-      <Problem t={t} />
-      <Features t={t} />
-      <HowItWorks t={t} />
-      <Preview t={t} />
-      <Testimonials t={t} />
-      <Pricing t={t} />
-      <CTA t={t} />
-      <Footer />
+      {t && (
+        <>
+          <Hero t={t} />
+          <Problem t={t} />
+          <Features t={t} />
+          <HowItWorks t={t} />
+          <Preview t={t} />
+          <Testimonials t={t} />
+          <Pricing t={t} />
+          <CTA t={t} />
+          <Footer />
+        </>
+      )}
 
     </div>
   );

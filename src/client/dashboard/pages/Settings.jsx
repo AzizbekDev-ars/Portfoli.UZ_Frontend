@@ -206,8 +206,8 @@ const Settings = () => {
              
              <div className="flex flex-col sm:flex-row gap-8 items-start">
                {/* Avatar Area */}
-               <div className="flex flex-col items-center gap-4">
-                  <div className="relative group w-32 h-32 rounded-full border-4 border-white dark:border-black shadow-lg overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
+               <div className="flex flex-col items-center gap-4 shrink-0">
+                  <div className="relative group w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-black shadow-lg overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
                     {settings.avatar ? (
                       <img src={settings.avatar} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
@@ -216,14 +216,14 @@ const Settings = () => {
                       </div>
                     )}
                     
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-sm">
-                       <label className="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center cursor-pointer hover:bg-white/40 transition-colors">
+                    {/* Hover Overlay - Desktop only or touch friendly */}
+                    <div className="absolute inset-0 bg-black/50 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-sm">
+                       <label className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-black sm:bg-white/20 sm:text-white flex items-center justify-center cursor-pointer hover:bg-white/40 transition-colors shadow-lg">
                          <CameraIcon />
                          <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                        </label>
                        {settings.avatar && (
-                         <button onClick={handleAvatarDelete} className="w-10 h-10 rounded-full bg-red-500/80 text-white flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors">
+                         <button onClick={handleAvatarDelete} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white sm:bg-red-500/80 flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors shadow-lg">
                            <TrashIcon />
                          </button>
                        )}
@@ -285,6 +285,7 @@ const Settings = () => {
                        name="username"
                        value={settings.username}
                        onChange={handleInputChange}
+                       
                        className="flex-1 min-w-0 bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-r-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm font-bold"
                        placeholder="username"
                      />
@@ -360,12 +361,12 @@ const Settings = () => {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         key={contact.id} 
-                        className="flex flex-col sm:flex-row items-stretch gap-2"
+                        className="flex items-center gap-2"
                       >
                          <select 
                            value={contact.type}
                            onChange={(e) => updateContact(contact.id, 'type', e.target.value)}
-                           className="w-full sm:w-1/3 bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all text-sm appearance-none cursor-pointer"
+                           className="w-24 sm:w-1/4 bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all text-[10px] sm:text-sm appearance-none cursor-pointer shrink-0"
                          >
                            <option value="Telegram">Telegram</option>
                            <option value="Phone">Tel Raqam</option>
@@ -379,19 +380,19 @@ const Settings = () => {
                          </select>
                          
                          <div className="flex-1 flex gap-2">
-                           <input 
-                             type="text" 
-                             value={contact.link}
-                             onChange={(e) => updateContact(contact.id, 'link', e.target.value)}
-                             placeholder={`${contact.type} havola yoki raqam`}
-                             className="flex-1 bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all text-sm"
-                           />
-                           <button 
-                             onClick={() => deleteContact(contact.id)}
-                             className="w-12 shrink-0 bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 border border-transparent rounded-xl flex items-center justify-center transition-colors"
-                           >
-                             <TrashIcon />
-                           </button>
+                            <input 
+                              type="text" 
+                              value={contact.link}
+                              onChange={(e) => updateContact(contact.id, 'link', e.target.value)}
+                              placeholder={`${contact.type}...`}
+                              className="flex-1 bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all text-[10px] sm:text-sm min-w-0"
+                            />
+                            <button 
+                              onClick={() => deleteContact(contact.id)}
+                              className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 border border-transparent rounded-xl flex items-center justify-center transition-colors"
+                            >
+                              <TrashIcon />
+                            </button>
                          </div>
                       </motion.div>
                     ))}
@@ -510,20 +511,20 @@ const Settings = () => {
          </div>
          <p className="text-sm text-slate-500 mb-6">O'zingizga yoqqan dizayn uslubini tanlang. Qolgan barcha ma'lumotlar avtomatik tarzda moslashadi.</p>
          
-         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6">
             {['Oddiy', 'Zamonaviy', 'Maxsus', 'Creative', 'Animatsion'].map((design) => (
               <div
                 key={design}
                 onClick={() => handleDesignSelect(design)}
-                className={`cursor-pointer relative flex flex-col items-center justify-center p-6 rounded-3xl border-2 transition-all min-h-[180px] shadow-sm hover:shadow-md ${
+                className={`cursor-pointer relative flex flex-col items-center justify-center p-3 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all min-h-[120px] sm:min-h-[180px] shadow-sm hover:shadow-md ${
                   settings.selectedDesign === design 
                     ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10' 
                     : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:border-indigo-300 dark:hover:border-indigo-500/30'
                 }`}
               >
                  {/* Card Decoration Element */}
-                 <div className={`w-14 h-14 mb-4 rounded-2xl flex items-center justify-center shadow-sm ${settings.selectedDesign === design ? 'bg-indigo-500 text-white shadow-indigo-500/40' : 'bg-white dark:bg-black text-slate-400 border border-slate-200 dark:border-white/10'}`}>
-                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                 <div className={`w-10 h-10 sm:w-14 sm:h-14 mb-2 sm:mb-4 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm ${settings.selectedDesign === design ? 'bg-indigo-500 text-white shadow-indigo-500/40' : 'bg-white dark:bg-black text-slate-400 border border-slate-200 dark:border-white/10'}`}>
+                   <svg className="w-5 h-5 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.315 48.315 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
                    </svg>
                  </div>
@@ -555,3 +556,4 @@ const Settings = () => {
 };
 
 export default Settings;
+
