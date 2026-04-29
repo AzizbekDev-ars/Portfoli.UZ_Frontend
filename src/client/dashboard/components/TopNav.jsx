@@ -63,15 +63,15 @@ const TopNav = ({ onMenuClick }) => {
           <option className="text-black" value="en">EN</option>
         </select>
 
-        {/* View Portfolio - Mobile Hidden, Icon only on small screens? Let's just hide or show icon */}
+        {/* View Portfolio - Responsive Link */}
         <a 
           href="/mr-fury" 
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden sm:flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-[10px] md:text-sm rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-[10px] md:text-sm rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95 shadow-sm"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-          <span className="hidden md:inline">Portfolioni ko'rish</span>
+          <span className="hidden xs:inline md:inline">Portfolioni ko'rish</span>
         </a>
 
         {/* User Profile */}
