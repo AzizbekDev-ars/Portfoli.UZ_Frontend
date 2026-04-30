@@ -1,16 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LangContext';
 
 const portfolioLang = {
-  uz: { hero: "Men haqimda", hire: "Bog'lanish", certs: "Sertifikatlar", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Birgalikda ishlaymizmi?", name: "Ism", email: "Email", msg: "Xabaringiz", send: "Yuborish" },
-  ru: { hero: "Обо мне", hire: "Связаться", certs: "Сертификаты", exp: "Опыт", proj: "Проекты", cvBtn: "Скачать CV", contactTitle: "Свяжемся?", name: "Имя", email: "Email", msg: "Сообщение", send: "Отправить" },
-  en: { hero: "About Me", hire: "Hire Me", certs: "Certificates", exp: "Experience", proj: "Projects", cvBtn: "Download CV", contactTitle: "Let's collaborate!", name: "Name", email: "Email", msg: "Message", send: "Send" }
+  uz: { hero: "Men haqimda", hire: "Bog'lanish", certs: "Sertifikatlar", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Birgalikda ishlaymizmi?", name: "Ism", email: "Email", msg: "Xabaringiz", send: "Yuborish", success: "Xabar yuborildi!", error: "Xatolik yuz berdi" },
+  ru: { hero: "Обо мне", hire: "Связаться", certs: "Сертификаты", exp: "Опыт", proj: "Проекты", cvBtn: "Скачать CV", contactTitle: "Свяжемся?", name: "Имя", email: "Email", msg: "Сообщение", send: "Отправить", success: "Сообщение отправлено!", error: "Произошла ошибка" },
+  en: { hero: "About Me", hire: "Hire Me", certs: "Certificates", exp: "Experience", proj: "Projects", cvBtn: "Download CV", contactTitle: "Let's collaborate!", name: "Name", email: "Email", msg: "Message", send: "Send", success: "Message sent!", error: "Something went wrong" }
 };
 
-const Zamonaviy = ({ data }) => {
+const Zamonaviy = ({ data, onSendMessage, onDownloadCV }) => {
   const { lang, setLang } = useLang();
   const t = portfolioLang[lang] || portfolioLang['uz'];
+
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState(null); // 'sending', 'success', 'error'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    const res = await onSendMessage(formData);
+    if (res.success) {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setStatus(null), 3000);
+    } else {
+      setStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#030712] dark:text-slate-200 font-sans relative overflow-hidden transition-colors duration-500 selection:bg-indigo-500/30">
@@ -69,7 +85,12 @@ const Zamonaviy = ({ data }) => {
                {data.aboutMe}
             </p>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all border border-indigo-400/50">
+              <motion.button 
+                whileHover={{ scale: 1.05 }} 
+                whileTap={{ scale: 0.95 }} 
+                onClick={onDownloadCV}
+                className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all border border-indigo-400/50"
+              >
                  {t.cvBtn}
               </motion.button>
               <div className="flex gap-2">
@@ -116,7 +137,7 @@ const Zamonaviy = ({ data }) => {
                      {/* Hover floating badge */}
                      <div className="absolute bottom-6 left-6 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                         <span className="px-4 py-2 rounded-xl bg-white/90 dark:bg-black/80 backdrop-blur-md text-indigo-600 dark:text-cyan-400 text-sm font-bold shadow-xl">
-                          View Case Study
+                          View Project
                         </span>
                      </div>
                    </div>
@@ -225,21 +246,47 @@ const Zamonaviy = ({ data }) => {
                </div>
 
                <div className="bg-white/5 dark:bg-black/20 p-8 rounded-3xl border border-white/10">
-                 <form className="flex flex-col gap-6" onSubmit={e => e.preventDefault()}>
+                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
                     <div>
                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.name}</label>
-                       <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium" />
+                       <input 
+                        required
+                        type="text" 
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium" 
+                       />
                     </div>
                     <div>
                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.email}</label>
-                       <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium" />
+                       <input 
+                        required
+                        type="email" 
+                        value={formData.email}
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium" 
+                       />
                     </div>
                     <div>
                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t.msg}</label>
-                       <textarea rows="4" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium resize-none"></textarea>
+                       <textarea 
+                        required
+                        rows="4" 
+                        value={formData.message}
+                        onChange={e => setFormData({...formData, message: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-medium resize-none"
+                       ></textarea>
                     </div>
-                    <button type="button" className="w-full py-4 bg-white text-slate-900 rounded-xl font-black text-lg hover:bg-indigo-400 hover:text-white transition-colors mt-2">
-                       {t.send}
+                    <button 
+                      disabled={status === 'sending'}
+                      type="submit" 
+                      className={`w-full py-4 rounded-xl font-black text-lg transition-colors mt-2 ${
+                        status === 'success' ? 'bg-emerald-500 text-white' : 
+                        status === 'error' ? 'bg-red-500 text-white' : 
+                        'bg-white text-slate-900 hover:bg-indigo-400 hover:text-white'
+                      }`}
+                    >
+                       {status === 'sending' ? '...' : status === 'success' ? t.success : status === 'error' ? t.error : t.send}
                     </button>
                  </form>
                </div>

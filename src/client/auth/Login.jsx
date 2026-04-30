@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import api from '../../API/axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const MoonIcon = () => <svg className="w-5 h-5 cursor-pointer" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>;
 const SunIcon = () => <svg className="w-5 h-5 cursor-pointer text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"></path></svg>;
@@ -11,6 +11,7 @@ const SunIcon = () => <svg className="w-5 h-5 cursor-pointer text-amber-500" fil
 const Login = () => {
   const { t, lang, setLang } = useLang();
   const { isDark, setIsDark } = useTheme();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -21,21 +22,10 @@ const Login = () => {
     e.preventDefault();
     setStatus('Loading...');
     
-    // FAKE LOGIN FALLBACK
-    if (email === 'client@gmail.com' && password === '123456') {
-      localStorage.setItem('TokenFSP', 'fake-jwt-token-fsp-abc123');
+    try {
+      await login(email, password);
       setStatus('Success: Tizimga kirdingiz!');
       setTimeout(() => navigate('/dashboard'), 500);
-      return;
-    }
-
-    try {
-      const res = await api.apiClient.post('/client/auth/login', { email, password });
-      setStatus('Success: ' + (res.data?.message || 'Logged in!'));
-      if(res.data?.token) {
-        localStorage.setItem('TokenFSP', res.data.token);
-        setTimeout(() => navigate('/dashboard'), 500);
-      }
     } catch (err) {
       setStatus('Error: ' + (err.response?.data?.message || err.message));
     }

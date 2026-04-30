@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.jsx'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { LangProvider } from './contexts/LangContext'
+import { AuthProvider } from './contexts/AuthContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <ThemeProvider>
-      <LangProvider>
-        <App />
-      </LangProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <LangProvider>
+          <App />
+        </LangProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </BrowserRouter>
 )

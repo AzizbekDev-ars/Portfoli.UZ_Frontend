@@ -1,16 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LangContext';
 
 const portfolioLang = {
-  uz: { hero: "Men haqimda", hire: "Bod'lanish", certs: "Sertifikat", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Bog'lanish", name: "Ism", email: "Email", msg: "Xabar", send: "Yuborish" },
-  ru: { hero: "Обо мне", hire: "Связаться", certs: "Признание", exp: "Опыт", proj: "Работы", cvBtn: "Скачать CV", contactTitle: "Написать", name: "Имя", email: "Email", msg: "Сообщение", send: "Отправить" },
-  en: { hero: "About", hire: "Contact", certs: "Awards", exp: "Experience", proj: "Work", cvBtn: "Download CV", contactTitle: "Get in touch", name: "Name", email: "Email", msg: "Message", send: "Submit" }
+  uz: { hero: "Men haqimda", hire: "Bog'lanish", certs: "Sertifikat", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Bog'lanish", name: "Ism", email: "Email", msg: "Xabar", send: "Yuborish", success: "Yuborildi", error: "Xato" },
+  ru: { hero: "Обо мне", hire: "Связаться", certs: "Признание", exp: "Опыт", proj: "Работы", cvBtn: "Скачать CV", contactTitle: "Написать", name: "Имя", email: "Email", msg: "Сообщение", send: "Отправить", success: "Готово", error: "Ошибка" },
+  en: { hero: "About", hire: "Contact", certs: "Awards", exp: "Experience", proj: "Work", cvBtn: "Download CV", contactTitle: "Get in touch", name: "Name", email: "Email", msg: "Message", send: "Submit", success: "Success", error: "Error" }
 };
 
-const Oddiy = ({ data }) => {
+const Oddiy = ({ data, onSendMessage, onDownloadCV }) => {
   const { lang, setLang } = useLang();
   const t = portfolioLang[lang] || portfolioLang['uz'];
+
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    const res = await onSendMessage(formData);
+    if (res.success) {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setStatus(null), 3000);
+    } else {
+      setStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#111] text-[#111] dark:text-[#fafafa] font-sans selection:bg-black/10 dark:selection:bg-white/20 transition-colors duration-700">
@@ -48,7 +64,7 @@ const Oddiy = ({ data }) => {
                <span className="text-gray-400 dark:text-gray-500">{data.aboutMe}</span>
             </h1>
             <div className="flex gap-4">
-              <button className="text-[13px] font-medium bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2">
+              <button onClick={onDownloadCV} className="text-[13px] font-medium bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2">
                 {t.cvBtn}
               </button>
               {data.contacts.map((c, i) => (
@@ -126,24 +142,28 @@ const Oddiy = ({ data }) => {
                <div className="space-y-4 text-[15px] text-gray-500">
                  <p>{data.address}</p>
                  <p>{data.availableTime}</p>
-                 <p className="pt-4"><a href={`mailto:${data.contacts[0]?.link}`} className="text-black dark:text-white hover:underline underline-offset-4">Say hello &rarr;</a></p>
+                 <p className="pt-4"><a href={`mailto:${data.email}`} className="text-black dark:text-white hover:underline underline-offset-4">Say hello &rarr;</a></p>
                </div>
              </div>
              
              <div className="md:w-2/3">
-                <form className="flex flex-col gap-8" onSubmit={e => e.preventDefault()}>
+                <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
                   <div>
-                    <input type="text" placeholder={t.name} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors" />
+                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" placeholder={t.name} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors" />
                   </div>
                   <div>
-                    <input type="email" placeholder={t.email} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors" />
+                    <input required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" placeholder={t.email} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors" />
                   </div>
                   <div>
-                    <textarea rows="3" placeholder={t.msg} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors resize-none"></textarea>
+                    <textarea required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} rows="3" placeholder={t.msg} className="w-full bg-transparent border-b border-black/10 dark:border-white/10 pb-3 outline-none text-[15px] focus:border-black dark:focus:border-white transition-colors resize-none"></textarea>
                   </div>
                   <div>
-                    <button type="button" className="text-[13px] font-medium bg-black dark:bg-white text-white dark:text-black px-8 py-3 rounded-full hover:opacity-80 transition-opacity">
-                      {t.send}
+                    <button disabled={status === 'sending'} type="submit" className={`text-[13px] font-medium px-8 py-3 rounded-full transition-opacity ${
+                      status === 'success' ? 'bg-emerald-500 text-white' :
+                      status === 'error' ? 'bg-red-500 text-white' :
+                      'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                    }`}>
+                      {status === 'sending' ? '...' : status === 'success' ? t.success : status === 'error' ? t.error : t.send}
                     </button>
                   </div>
                 </form>

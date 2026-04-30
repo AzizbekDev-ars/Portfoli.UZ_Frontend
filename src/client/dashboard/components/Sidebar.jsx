@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useLang } from '../../../contexts/LangContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Simple SVG Icons
@@ -19,6 +20,7 @@ const CrownIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} str
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useLang();
+  const { user } = useAuth();
   const [isPro, setIsPro] = React.useState(false);
 
   React.useEffect(() => {
@@ -96,9 +98,9 @@ const Sidebar = ({ isOpen, onClose }) => {
           </NavLink>
         ))}
 
-        <div className="pt-4 mt-4 border-t border-slate-200 dark:border-white/10 lg:hidden">
+        <div className="pt-4 mt-4 border-t border-slate-200 dark:border-white/10">
           <a 
-            href="/mr-fury" 
+            href={`/${user?.username || ''}`} 
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 border border-indigo-500/20"

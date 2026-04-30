@@ -143,7 +143,7 @@ const Maxsus = ({ data }) => {
                <div className="font-sans">
                  <p className="text-[#a0a0a0] mb-6 text-sm tracking-widest uppercase">Office: <span className="text-white block mt-2 text-lg normal-case font-serif italic">{data.address}</span></p>
                  <p className="text-[#a0a0a0] mb-12 text-sm tracking-widest uppercase">Hours: <span className="text-white block mt-2 text-lg normal-case font-serif italic">{data.availableTime}</span></p>
-                 <a href={`mailto:${data.contacts[0]?.link}`} className="text-[#cda25e] tracking-[0.2em] uppercase text-xs font-bold hover:text-white transition-colors border-b border-[#cda25e] pb-2">
+                 <a href={`mailto:${data.email}`} className="text-[#cda25e] tracking-[0.2em] uppercase text-xs font-bold hover:text-white transition-colors border-b border-[#cda25e] pb-2">
                    Drop an inquiry
                  </a>
                </div>

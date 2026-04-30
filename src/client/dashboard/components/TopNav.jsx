@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLang } from '../../../contexts/LangContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const MoonIcon = () => <svg className="w-5 h-5 cursor-pointer" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>;
@@ -11,6 +12,7 @@ const MenuIcon = () => <svg className="w-6 h-6 text-slate-600 dark:text-slate-30
 const TopNav = ({ onMenuClick }) => {
   const { isDark, setIsDark } = useTheme();
   const { lang, setLang, t } = useLang();
+  const { user } = useAuth();
   
   const location = useLocation();
   const pathName = location.pathname.split('/').pop();
@@ -65,7 +67,7 @@ const TopNav = ({ onMenuClick }) => {
 
         {/* View Portfolio - Responsive Link */}
         <a 
-          href="/mr-fury" 
+          href={`/${user?.username || ''}`} 
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-[10px] md:text-sm rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95 shadow-sm"
@@ -77,12 +79,12 @@ const TopNav = ({ onMenuClick }) => {
         {/* User Profile */}
         <div className="flex items-center gap-2 md:gap-3 pl-2 border-l border-slate-200 dark:border-white/10">
           <div className="flex flex-col text-right hidden sm:flex">
-            <span className="text-xs md:text-sm font-bold text-slate-800 dark:text-white">Admin</span>
-            <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Pro</span>
+            <span className="text-xs md:text-sm font-bold text-slate-800 dark:text-white">{user?.username || 'Admin'}</span>
+            <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{user?.isPro ? 'Pro' : 'Free'}</span>
           </div>
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-white/10 p-0.5">
             <img 
-              src="https://ui-avatars.com/api/?name=Admin+Client&background=6366f1&color=fff" 
+              src={user?.profileImage?.url || `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=6366f1&color=fff`} 
               alt="User" 
               className="w-full h-full rounded-full object-cover"
             />

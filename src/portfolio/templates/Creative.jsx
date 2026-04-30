@@ -1,16 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../../contexts/LangContext';
 
 const portfolioLang = {
-  uz: { hero: "Men haqimda", hire: "Holat: Ochiq", certs: "Sertifikat", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Yozish!", name: "Ism", email: "Email", msg: "Xabaring", send: "Yuborish!" },
-  ru: { hero: "Обо мне", hire: "Доступен", certs: "Сертификаты", exp: "Опыт", proj: "Проекты", cvBtn: "Мое CV", contactTitle: "Написать", name: "Имя", email: "Email", msg: "Текст", send: "Отправить!" },
-  en: { hero: "About", hire: "Available", certs: "Certs", exp: "Experience", proj: "Work", cvBtn: "Get CV", contactTitle: "Say Hi!", name: "Name", email: "Email", msg: "Message", send: "Send It!" }
+  uz: { hero: "Men haqimda", hire: "Holat: Ochiq", certs: "Sertifikat", exp: "Tajriba", proj: "Loyihalar", cvBtn: "CV ni Yuklash", contactTitle: "Yozish!", name: "Ism", email: "Email", msg: "Xabaring", send: "Yuborish!", success: "Ketdi!", error: "Xato!" },
+  ru: { hero: "Обо мне", hire: "Доступен", certs: "Сертификаты", exp: "Опыт", proj: "Проекты", cvBtn: "Мое CV", contactTitle: "Написать", name: "Имя", email: "Email", msg: "Текст", send: "Отправить!", success: "Готово!", error: "Ошибка!" },
+  en: { hero: "About", hire: "Available", certs: "Certs", exp: "Experience", proj: "Work", cvBtn: "Get CV", contactTitle: "Say Hi!", name: "Name", email: "Email", msg: "Message", send: "Send It!", success: "Sent!", error: "Error!" }
 };
 
-const Creative = ({ data }) => {
+const Creative = ({ data, onSendMessage, onDownloadCV }) => {
   const { lang, setLang } = useLang();
   const t = portfolioLang[lang] || portfolioLang['uz'];
+
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    const res = await onSendMessage(formData);
+    if (res.success) {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setStatus(null), 3000);
+    } else {
+      setStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F0F0F0] text-black font-mono relative overflow-hidden">
@@ -42,14 +58,14 @@ const Creative = ({ data }) => {
                🔥 Hello, World!
             </motion.div>
             <h1 className="text-5xl md:text-8xl font-black mb-8 uppercase leading-none tracking-tighter">
-              <span className="bg-[#2ECC40] text-white px-2 mb-2 inline-block border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] rotate-1">{data.firstName}</span> <br/> 
-              <span className="bg-white px-2 inline-block border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] -rotate-1">{data.lastName}</span>
+              <span className="bg-[#2ECC40] text-white px-2 mb-2 inline-block border-4 border-black shadow-[6px_6px_0_rgba(0,0,0,1)] rotate-1">{data.firstName}</span> <br/> 
+              <span className="bg-white px-2 inline-block border-4 border-black shadow-[6px_6px_0_rgba(0,0,0,1)] -rotate-1">{data.lastName}</span>
             </h1>
             <p className="text-xl md:text-2xl font-bold bg-white border-4 border-black p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] mb-10 max-w-2xl leading-relaxed">
               {data.aboutMe}
             </p>
             <div className="flex gap-4 flex-wrap">
-              <button className="px-8 py-4 bg-[#FF851B] border-4 border-black font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-none transition-all uppercase">
+              <button onClick={onDownloadCV} className="px-8 py-4 bg-[#FF851B] border-4 border-black font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-none transition-all uppercase">
                 {t.cvBtn}
               </button>
               <div className="flex gap-3">
@@ -73,10 +89,10 @@ const Creative = ({ data }) => {
           )}
         </section>
 
-        {/* PROJECTS MARQUEE & GRID */}
+        {/* PROJECTS */}
         {data.projects?.length > 0 && (
           <section className="mb-32">
-            <div className="bg-black text-white py-4 overflow-hidden mb-12 border-y-4 border-black shadow-[0_8px_0px_rgba(0,0,0,1)] transform -rotate-1 w-[110vw] relative left-1/2 -ml-[55vw]">
+            <div className="bg-black text-white py-4 overflow-hidden mb-12 border-y-4 border-black shadow-[0_8px_0_rgba(0,0,0,1)] transform -rotate-1 w-[110vw] relative left-1/2 -ml-[55vw]">
                <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] font-black text-4xl uppercase items-center gap-8">
                  <span>{t.proj}</span> <span className="text-[#FFD700]">★</span> 
                  <span>{t.proj}</span> <span className="text-[#FFD700]">★</span>
@@ -127,9 +143,8 @@ const Creative = ({ data }) => {
           </section>
         )}
 
-        {/* CONTACT BRUTALISM */}
+        {/* CONTACT */}
         <section id="contact" className="bg-[#2ECC40] border-4 border-black p-8 md:p-16 shadow-[16px_16px_0px_rgba(0,0,0,1)] relative z-10 overflow-hidden">
-           {/* Abstract shape */}
            <svg className="absolute bottom-0 right-0 w-64 h-64 text-black opacity-10 -mr-16 -mb-16 rotate-12 pointer-events-none" viewBox="0 0 100 100" fill="currentColor">
               <polygon points="50,0 100,50 50,100 0,50" />
            </svg>
@@ -148,14 +163,18 @@ const Creative = ({ data }) => {
                </div>
              </div>
              
-             <form className="lg:col-span-3 flex flex-col gap-6" onSubmit={e => e.preventDefault()}>
+             <form className="lg:col-span-3 flex flex-col gap-6" onSubmit={handleSubmit}>
                 <div className="flex flex-col md:flex-row gap-6">
-                  <input type="text" placeholder={t.name} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all placeholder-gray-400" />
-                  <input type="email" placeholder={t.email} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all placeholder-gray-400" />
+                  <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" placeholder={t.name} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all placeholder-gray-400" />
+                  <input required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" placeholder={t.email} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all placeholder-gray-400" />
                 </div>
-                <textarea rows="4" placeholder={t.msg} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all resize-none placeholder-gray-400"></textarea>
-                <button type="button" className="py-5 bg-black text-[#FFD700] border-4 border-black font-black text-3xl hover:bg-white hover:text-black hover:translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000] transition-all uppercase w-full">
-                  {t.send}
+                <textarea required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} rows="4" placeholder={t.msg} className="w-full bg-white border-4 border-black px-6 py-4 font-black text-xl outline-none focus:translate-x-1 focus:-translate-y-1 focus:shadow-[4px_4px_0_#000] transition-all resize-none placeholder-gray-400"></textarea>
+                <button disabled={status === 'sending'} type="submit" className={`py-5 border-4 border-black font-black text-3xl hover:translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000] transition-all uppercase w-full ${
+                  status === 'success' ? 'bg-white text-emerald-500' :
+                  status === 'error' ? 'bg-white text-red-500' :
+                  'bg-black text-[#FFD700]'
+                }`}>
+                  {status === 'sending' ? '...' : status === 'success' ? t.success : status === 'error' ? t.error : t.send}
                 </button>
              </form>
            </div>

@@ -1,44 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import api from '../../../services/api';
 import PaymentModal from '../components/PaymentModal';
-import UpgradePlaceholder from '../components/UpgradePlaceholder';
 
-// Mock Data (Global Context dan keladigan ma'lumotlar o'rnida)
-const mockData = {
-  user: {
-    firstName: "Ali",
-    lastName: "Valiyev",
-    aboutMe: "Men 5 yillik tajribaga ega Full-Stack dasturchiman. Ilovalar arxitekturasi va foydalanuvchi interfeyslarini yaratish bo'yicha kuchli tajribaga egaman. Doimo yangi texnologiyalarni o'rganishga mukkasidan ketganman.",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
-    profession: "Senior Software Engineer",
-    address: "Toshkent sh., Chilonzor tumani",
-    contacts: [
-      { type: "Phone", link: "+998 90 123 45 67" },
-      { type: "Email", link: "ali.valiyev@example.com" },
-      { type: "LinkedIn", link: "linkedin.com/in/mrfury" },
-      { type: "GitHub", link: "github.com/mrfury" }
-    ]
-  },
-  experiences: [
-    { id: 1, company: 'Meta', role: 'Senior Frontend Engineer', startDate: '2022-01', endDate: 'Hozirgacha', description: 'React va qoshimcha kutubxonalar yordamida yirik web ilovalarning old qismini yozish. Katta hajmdagi ma\'lumotlar bilan ishlash va render jarayonini optimallashtirish.' },
-    { id: 2, company: 'EPAM Systems', role: 'Middle JavaScript Developer', startDate: '2019-05', endDate: '2021-12', description: 'Murakkab mijozlar uchun web ilovalarni ishlab chiqish, kodlarni optimallashtirish va takrorlanmas UI kutubxonalar yaratish.' }
-  ],
-  projects: [
-    { id: 1, title: 'E-commerce React Ilova', description: 'Zamonaviy e-commerce loyiha. React, Redux, va TailwindCSS orqali yozilgan. To\'lov tizimlari to\'liq mavjud.', demoLink: 'myecommerce.uz' },
-    { id: 2, title: 'Chat Ilovasi (Real-time)', description: 'Socket.io va MERN (MongoDB, Express, React, Node.js) yordamida yozilgan jonli suhbat ilovasi.', demoLink: 'chat.example.com' },
-    { id: 3, title: 'Portfolio Sayt', description: 'Frontend dasturchilar uchun maxsus platforma. MERN stack asosida yaratilgan SSR arxitekturasi.', demoLink: 'portfolio.uz' }
-  ],
-  certificates: [
-    { id: 1, title: 'Frontend Developer (React)', provider: 'Meta / Coursera', date: '2023-11' },
-    { id: 2, title: 'JavaScript Algorithms', provider: 'freeCodeCamp', date: '2022-05' },
-    { id: 3, title: 'Responsive Web Design', provider: 'Google', date: '2021-08' }
-  ]
-};
+const UpgradePlaceholder = ({ title, description, onUpgradeClick }) => (
+  <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white dark:bg-white/5 rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 shadow-sm">
+    <div className="w-20 h-20 rounded-2xl bg-indigo-500/20 text-indigo-600 flex items-center justify-center mb-6">
+      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+    </div>
+    <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-3">{title}</h3>
+    <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8">{description}</p>
+    <button 
+      onClick={onUpgradeClick}
+      className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-lg shadow-indigo-500/25 active:scale-95"
+    >
+      Tarifni Yangilash ($3)
+    </button>
+  </div>
+);
 
 const CV = () => {
   const [selectedDesign, setSelectedDesign] = useState('modern');
   const [isPro, setIsPro] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
+  const [userData, setUserData] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [experiences, setExperiences] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("portfolioSettings");
@@ -48,18 +39,57 @@ const CV = () => {
     } else {
       setIsPro(false);
     }
-  }, []);
+    
+    if (isPro) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [isPro]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [resUser, resProjects, resExp, resCert] = await Promise.all([
+        api.get('/auth/me'),
+        api.get('/project'),
+        api.get('/experience'),
+        api.get('/certificate')
+      ]);
+
+      setUserData(resUser.data);
+      setProjects(resProjects.data.filter(p => p.isCV));
+      setExperiences(resExp.data.filter(e => e.isCV));
+      setCertificates(resCert.data);
+    } catch (err) {
+      console.error("Error fetching CV data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      setDownloading(true);
+      const res = await api.post('/cv/generate-auto', { design: selectedDesign });
+      if (res.data.success && res.data.url) {
+        window.open(res.data.url, '_blank');
+      }
+    } catch (err) {
+      alert("PDF yaratishda xatolik yuz berdi: " + err.message);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handlePaymentSuccess = () => {
     setIsPaymentModalOpen(false);
     setIsPro(true);
-    const saved = localStorage.getItem("portfolioSettings");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      parsed.isPro = true;
-      localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
-    }
-    alert("Tabriklaymiz! Siz endi PRO tarifidasiz \uD83C\uDF89");
+    const saved = localStorage.getItem("portfolioSettings") || "{}";
+    const parsed = JSON.parse(saved);
+    parsed.isPro = true;
+    localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
+    alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
   };
 
   const designs = [
@@ -69,12 +99,6 @@ const CV = () => {
     { id: 'ultra-formal', name: 'O\'ta Rasmiy', desc: 'Faqat oq-qora, serif shriftlar (Times)' }
   ];
 
-  
-  /* 
-    Dizayn konfiguratsiyasi (Tailwind classlari bo'yicha). 
-    A4 format: width va height belgilangan (aspect ratio: 1 / 1.414). 
-    Lekin responsiveda kichrayadi. 
-  */
   const getThemeClasses = () => {
     switch(selectedDesign) {
       case 'ultra-formal':
@@ -127,11 +151,9 @@ const CV = () => {
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) {
-        // Mobile: calculate scale to fit the 800px width into the screen width (minus padding)
         const newScale = (width - 32) / 800; 
         setScale(newScale);
       } else if (width < 1024) {
-        // Tablet: 
         const newScale = (width - 100) / 800;
         setScale(newScale);
       } else {
@@ -145,6 +167,8 @@ const CV = () => {
   }, []);
 
   const t = getThemeClasses();
+
+  if (loading) return <div className="h-96 flex items-center justify-center font-black text-xl uppercase tracking-widest text-slate-400">Tayyorlanmoqda...</div>;
 
   if (!isPro) {
     return (
@@ -179,9 +203,17 @@ const CV = () => {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Dizaynni tanlang, ma'lumotlaringiz avtomatik joylashadi.</p>
         </div>
         
-        <button className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
-          <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-          Yuklab Olish (PDF)
+        <button 
+          onClick={handleDownload}
+          disabled={downloading}
+          className={`bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg active:scale-95 flex items-center gap-2 ${downloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {downloading ? (
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          ) : (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+          )}
+          {downloading ? 'Yaratilmoqda...' : 'Yuklab Olish (PDF)'}
         </button>
       </div>
 
@@ -231,9 +263,9 @@ const CV = () => {
                {/* Photo */}
                <div className="flex justify-center mb-8">
                   {selectedDesign === 'ultra-formal' ? (
-                    <img src={mockData.user.avatar} alt="Profile" className="w-32 h-40 object-cover border-4 border-black grayscale" />
+                    <img src={userData?.profileData?.avatar || `https://ui-avatars.com/api/?name=${userData?.username}&background=random`} alt="Profile" className="w-32 h-40 object-cover border-4 border-black grayscale" />
                   ) : (
-                    <img src={mockData.user.avatar} alt="Profile" className={`w-40 h-40 object-cover rounded-full ${selectedDesign === 'creative' ? 'border-4 border-white shadow-xl' : 'border-4 border-white/20'}`} />
+                    <img src={userData?.profileData?.avatar || `https://ui-avatars.com/api/?name=${userData?.username}&background=random`} alt="Profile" className={`w-40 h-40 object-cover rounded-full ${selectedDesign === 'creative' ? 'border-4 border-white shadow-xl' : 'border-4 border-white/20'}`} />
                   )}
                </div>
 
@@ -243,15 +275,15 @@ const CV = () => {
                    Bog'lanish
                  </h4>
                  <ul className="flex flex-col gap-4 text-sm">
-                   {mockData.user.contacts.map((contact, i) => (
+                   {Object.entries(userData?.socialLinks || {}).filter(([_, link]) => link).map(([type, link], i) => (
                      <li key={i} className="flex flex-col">
-                       <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>{contact.type}</span>
-                       <span>{contact.link}</span>
+                       <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>{type}</span>
+                       <span className="truncate">{link}</span>
                      </li>
                    ))}
                    <li className="flex flex-col mt-2">
                        <span className={`text-xs opacity-70 uppercase tracking-wider ${selectedDesign === 'ultra-formal' ? 'font-bold' : ''}`}>Manzil</span>
-                       <span>{mockData.user.address}</span>
+                       <span>{userData?.profileData?.location || 'N/A'}</span>
                    </li>
                  </ul>
                </div>
@@ -262,8 +294,8 @@ const CV = () => {
                    Sertifikatlar
                  </h4>
                  <ul className="flex flex-col gap-5 text-sm">
-                   {mockData.certificates.map(cert => (
-                     <li key={cert.id}>
+                   {certificates.map(cert => (
+                     <li key={cert._id}>
                        <div className={`font-bold ${selectedDesign === 'ultra-formal' ? '' : selectedDesign === 'formal' ? 'text-slate-800' : 'text-white'}`}>
                          {cert.title}
                        </div>
@@ -282,16 +314,16 @@ const CV = () => {
                 {/* Header inside Right Column */}
                 <div className="mb-10">
                   <h2 className={t.name}>
-                    {mockData.user.firstName} {mockData.user.lastName}
+                    {userData?.profileData?.fullName || userData?.username}
                   </h2>
-                  <div className={`text-xl tracking-wide ${t.accent}`}>{mockData.user.profession}</div>
+                  <div className={`text-xl tracking-wide ${t.accent}`}>{userData?.profileData?.profession || 'Developer'}</div>
                 </div>
 
                 {/* Profile / About */}
                 <div className="mb-10">
                   <h3 className={t.sectionTitle}>Profil</h3>
                   <p className="leading-relaxed text-sm">
-                    {mockData.user.aboutMe}
+                    {userData?.profileData?.bio || 'Hali bio kiritilmagan.'}
                   </p>
                 </div>
 
@@ -299,8 +331,8 @@ const CV = () => {
                 <div className="mb-10">
                   <h3 className={t.sectionTitle}>Ish Tajribasi</h3>
                   <div className="flex flex-col gap-2">
-                     {mockData.experiences.map((exp) => (
-                       <div key={exp.id} className={t.itemBorder}>
+                     {experiences.map((exp) => (
+                       <div key={exp._id} className={t.itemBorder}>
                           <div className="flex justify-between items-start mb-1">
                             <h4 className={`text-lg ${t.accent}`}>{exp.role}</h4>
                             <span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600 shrink-0">
@@ -322,13 +354,13 @@ const CV = () => {
                 <div>
                   <h3 className={t.sectionTitle}>Loyihalar</h3>
                   <div className="flex flex-col gap-2">
-                     {mockData.projects.map((proj) => (
-                       <div key={proj.id} className={t.itemBorder}>
+                     {projects.map((proj) => (
+                       <div key={proj._id} className={t.itemBorder}>
                           <div className="flex justify-between items-center mb-1">
-                            <h4 className={`text-md ${t.accent}`}>{proj.title}</h4>
-                            {proj.demoLink && (
-                              <span className="text-xs text-indigo-600 underline">
-                                {proj.demoLink}
+                            <h4 className={`text-md ${t.accent}`}>{proj.projectname}</h4>
+                            {proj.link && (
+                              <span className="text-xs text-indigo-600 underline truncate max-w-[150px]">
+                                {proj.link}
                               </span>
                             )}
                           </div>

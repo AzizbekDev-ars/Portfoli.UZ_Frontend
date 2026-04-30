@@ -1,26 +1,143 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
+import api from '../../../services/api';
 
-// Simple Icons
-const SearchIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
+// Icons
+const SearchIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
 const PlusIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
-const EditIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>;
-const TrashIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>;
-const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
-const CalendarIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>;
-const MapPinIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>;
+const EditIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>;
+const TrashIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>;
+const MapPinIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 opacity-70"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>;
+const CalendarIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 opacity-70"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>;
+const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
-const initialCertificates = [
-  { id: 1, title: 'Frontend Developer (React)', provider: 'Meta / Coursera', date: '2023-11-01', description: 'Modern UI interfaces, Responsive Design, State Management and Advanced React concepts.', image: 'https://images.unsplash.com/photo-1614332287897-cdc485fa562d?auto=format&fit=crop&w=600&q=80' },
-  { id: 2, title: 'JavaScript Algorithms', provider: 'freeCodeCamp', date: '2022-05-15', description: 'Data structures, algorithm complexity, object oriented programming fundamentals.', image: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=600&q=80' },
-  { id: 3, title: 'Responsive Web Design', provider: 'Google', date: '2021-08-20', description: 'Accessibility, Mobile First architecture, CSS animations and layout optimization.', image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80' },
-];
+// Separate Form Component
+const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormData, handleInputChange }) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.95 }}
+    className="bg-white dark:bg-[#0a0a0a] w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 relative border border-slate-200 dark:border-white/10 z-50 max-h-[90vh] overflow-y-auto"
+    onClick={e => e.stopPropagation()}
+  >
+    <button 
+      type="button" 
+      onClick={onCancel}
+      className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+    >
+      <XIcon />
+    </button>
+
+    <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-wider">{title}</h2>
+    
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Sertifikat Surati</label>
+        <div className="flex items-center gap-4 w-full">
+          {formData.image && (
+            <img 
+              src={formData.image} 
+              alt="Preview" 
+              className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0" 
+            />
+          )}
+          <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl px-4 py-4 cursor-pointer hover:border-black dark:hover:border-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-center">
+             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+               {formData.image ? "Rasmni almashtirish" : "Sertifikat suratini yuklash"}
+             </span>
+             <span className="text-xs text-slate-400 mt-1">.jpg, .png, .jpeg</span>
+             <input 
+               type="file" 
+               accept="image/*"
+               onChange={(e) => {
+                 const file = e.target.files[0];
+                 if (file) {
+                   setFormData(prev => ({ ...prev, image: URL.createObjectURL(file), file: file }));
+                 }
+               }}
+               className="hidden" 
+             />
+          </label>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Sertifikat Nomi</label>
+          <input 
+            required 
+            type="text" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            placeholder="Masalan: React Developer..."
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Olingan Sana</label>
+          <input 
+            required 
+            type="date" 
+            name="date" 
+            value={formData.date} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
+          />
+        </div>
+      </div>
+
+      <div>
+         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Qayerdan Olingan</label>
+         <input 
+            required 
+            type="text" 
+            name="provider" 
+            value={formData.provider} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            placeholder="Masalan: Coursera, Udemy..."
+          />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Qisqacha Tafsif (Nima uchun)</label>
+        <textarea 
+          required 
+          rows="3" 
+          name="description" 
+          value={formData.description} 
+          onChange={handleInputChange}
+          className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm resize-none" 
+          placeholder="Nimalar o'rganildi, qanday natijalar..."
+        ></textarea>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-4">
+         <button 
+           type="button" 
+           onClick={onCancel}
+           className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+         >
+           Bekor qilish
+         </button>
+         <button 
+           type="submit" 
+           className="px-6 py-3 rounded-xl text-sm font-bold bg-black text-white dark:bg-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-lg"
+         >
+           {buttonText}
+         </button>
+      </div>
+    </form>
+  </motion.div>
+);
 
 const Certificates = () => {
   const { t } = useLang();
   
-  const [certificates, setCertificates] = useState(initialCertificates);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -33,168 +150,101 @@ const Certificates = () => {
     provider: '',
     date: '',
     description: '',
-    image: ''
+    image: '',
+    file: null
   });
 
-  const filteredCerts = certificates.filter(cert => 
-    cert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cert.provider.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const res = await api.get('/certificate');
+      setCertificates(res.data);
+    } catch (err) {
+      console.error("Error fetching certificates:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleOpenAdd = () => {
-    setFormData({ title: '', provider: '', date: '', description: '', image: '' });
+    setFormData({ title: '', provider: '', date: '', description: '', image: '', file: null });
     setIsAddModalOpen(true);
   };
 
   const handleOpenEdit = (cert) => {
     setCurrentCert(cert);
-    setFormData({ ...cert });
+    setFormData({ ...cert, file: null });
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if(window.confirm("Rostdan ham ushbu sertifikatni o'chirmoqchimisiz?")) {
-      setCertificates(prev => prev.filter(c => c.id !== id));
+      try {
+        await api.delete(`/certificate/${id}`);
+        setCertificates(prev => prev.filter(c => c._id !== id));
+      } catch (err) {
+        alert("Xatolik: " + err.message);
+      }
     }
   };
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
-    const newCert = { ...formData, id: Date.now() };
-    setCertificates([newCert, ...certificates]);
-    setIsAddModalOpen(false);
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('provider', formData.provider);
+    data.append('date', formData.date);
+    data.append('description', formData.description);
+    if (formData.file) {
+      data.append('certificate_image', formData.file);
+    }
+
+    try {
+      const res = await api.post('/certificate', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setCertificates([res.data, ...certificates]);
+      setIsAddModalOpen(false);
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setCertificates(prev => prev.map(c => c.id === currentCert.id ? { ...formData, id: currentCert.id } : c));
-    setIsEditModalOpen(false);
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('provider', formData.provider);
+    data.append('date', formData.date);
+    data.append('description', formData.description);
+    if (formData.file) {
+      data.append('certificate_image', formData.file);
+    }
+
+    try {
+      const res = await api.put(`/certificate/${currentCert._id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setCertificates(prev => prev.map(c => c._id === currentCert._id ? res.data : c));
+      setIsEditModalOpen(false);
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
   };
 
-  // Rendering the form to avoid duplication
-  const FormContent = ({ onSubmit, title, buttonText, onCancel }) => (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white dark:bg-[#0a0a0a] w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 relative border border-slate-200 dark:border-white/10 z-50 max-h-[90vh] overflow-y-auto"
-      onClick={e => e.stopPropagation()}
-    >
-      <button 
-        type="button" 
-        onClick={onCancel}
-        className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-      >
-        <XIcon />
-      </button>
-
-      <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-wider">{title}</h2>
-      
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Sertifikat Surati</label>
-          <div className="flex items-center gap-4 w-full">
-            {formData.image && (
-              <img 
-                src={formData.image} 
-                alt="Preview" 
-                className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0" 
-              />
-            )}
-            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl px-4 py-4 cursor-pointer hover:border-black dark:hover:border-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-center">
-               <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                 {formData.image ? "Rasmni almashtirish" : "Sertifikat suratini yuklash"}
-               </span>
-               <span className="text-xs text-slate-400 mt-1">.jpg, .png, .jpeg</span>
-               <input 
-                 type="file" 
-                 accept="image/*"
-                 onChange={(e) => {
-                   const file = e.target.files[0];
-                   if (file) {
-                     setFormData(prev => ({ ...prev, image: URL.createObjectURL(file), file: file }));
-                   }
-                 }}
-                 className="hidden" 
-               />
-            </label>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Sertifikat Nomi</label>
-            <input 
-              required 
-              type="text" 
-              name="title" 
-              value={formData.title} 
-              onChange={handleInputChange}
-              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
-              placeholder="Masalan: React Developer..."
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Olingan Sana</label>
-            <input 
-              required 
-              type="date" 
-              name="date" 
-              value={formData.date} 
-              onChange={handleInputChange}
-              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
-            />
-          </div>
-        </div>
-
-        <div>
-           <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Qayerdan Olingan</label>
-           <input 
-              required 
-              type="text" 
-              name="provider" 
-              value={formData.provider} 
-              onChange={handleInputChange}
-              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
-              placeholder="Masalan: Coursera, Udemy..."
-            />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Qisqacha Tafsif (Nima uchun)</label>
-          <textarea 
-            required 
-            rows="3" 
-            name="description" 
-            value={formData.description} 
-            onChange={handleInputChange}
-            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm resize-none" 
-            placeholder="Nimalar o'rganildi, qanday natijalar..."
-          ></textarea>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-4">
-           <button 
-             type="button" 
-             onClick={onCancel}
-             className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
-           >
-             Bekor qilish
-           </button>
-           <button 
-             type="submit" 
-             className="px-6 py-3 rounded-xl text-sm font-bold bg-black text-white dark:bg-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-lg"
-           >
-             {buttonText}
-           </button>
-        </div>
-      </form>
-    </motion.div>
+  const filteredCerts = certificates.filter(cert => 
+    cert.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cert.provider?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) return <div className="flex items-center justify-center h-full text-slate-500">Yuklanmoqda...</div>;
 
   return (
     <motion.div 
@@ -250,7 +300,7 @@ const Certificates = () => {
               layout
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              key={cert.id} 
+              key={cert._id} 
               className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
             >
               {/* Image Area */}
@@ -272,7 +322,7 @@ const Certificates = () => {
                      <EditIcon />
                    </button>
                    <button 
-                     onClick={() => handleDelete(cert.id)}
+                     onClick={() => handleDelete(cert._id)}
                      className="w-8 h-8 rounded-full bg-white dark:bg-black text-red-500 flex items-center justify-center shadow-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
                      title="O'chirish"
                    >
@@ -324,6 +374,9 @@ const Certificates = () => {
               buttonText="Qo'shish" 
               onSubmit={handleAddSubmit} 
               onCancel={() => setIsAddModalOpen(false)} 
+              formData={formData}
+              setFormData={setFormData}
+              handleInputChange={handleInputChange}
             />
           </div>
         )}
@@ -342,6 +395,9 @@ const Certificates = () => {
               buttonText="Saqlash" 
               onSubmit={handleEditSubmit} 
               onCancel={() => setIsEditModalOpen(false)} 
+              formData={formData}
+              setFormData={setFormData}
+              handleInputChange={handleInputChange}
             />
           </div>
         )}

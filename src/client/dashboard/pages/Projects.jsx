@@ -1,50 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
+import api from '../../../services/api';
 
-// Simple Icons
-const SearchIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
+// Icons
+const SearchIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
 const PlusIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
-const EditIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>;
-const TrashIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>;
-const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
-const GithubIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>;
-const ExternalLinkIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>;
+const EditIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>;
+const TrashIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>;
+const GithubIcon = () => <svg fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>;
+const ExternalLinkIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>;
+const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
-const initialProjects = [
-  { 
-    id: 1, 
-    title: 'E-commerce React Ilova', 
-    description: 'Zamonaviy e-commerce loyiha. React, Redux, va TailwindCSS orqali yozilgan. To\'lov tizimlari va korzina funksiyasi to\'liq mavjud.', 
-    githubLink: 'https://github.com/user/e-commerce',
-    demoLink: 'https://myecommerce.uz',
-    image: 'https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=600&q=80',
-    isCV: true
-  },
-  { 
-    id: 2, 
-    title: 'Chat Ilovasi (Real-time)', 
-    description: 'Socket.io va MERN (MongoDB, Express, React, Node.js) yordamida yozilgan jonli suhbat ilovasi. 1-to-1 guruh chatlarini qo\'llab quvvatlaydi.', 
-    githubLink: 'https://github.com/user/chat-app',
-    demoLink: 'https://chat.example.com',
-    image: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=600&q=80',
-    isCV: true
-  },
-  { 
-    id: 3, 
-    title: 'Portfolio Sayt', 
-    description: 'Frontend dasturchilar uchun maxsus platforma. MERN stack asosida yaratilgan.', 
-    githubLink: 'https://github.com/user/portfolio',
-    demoLink: 'https://portfolio.uz',
-    image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80',
-    isCV: false
-  },
-];
+// Separate Form Component to avoid re-renders on input
+const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormData, handleInputChange }) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.95 }}
+    className="bg-white dark:bg-[#0a0a0a] w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 relative border border-slate-200 dark:border-white/10 z-50 max-h-[90vh] overflow-y-auto"
+    onClick={e => e.stopPropagation()}
+  >
+    <button 
+      type="button" 
+      onClick={onCancel}
+      className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+    >
+      <XIcon />
+    </button>
+
+    <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-wider">{title}</h2>
+    
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Loyiha Surati</label>
+        <div className="flex items-center gap-4 w-full">
+          {formData.image && (
+            <img 
+              src={formData.image} 
+              alt="Preview" 
+              className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0" 
+            />
+          )}
+          <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl px-4 py-4 cursor-pointer hover:border-black dark:hover:border-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-center">
+             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+               {formData.image ? "Rasmni almashtirish" : "Loyiha suratini yuklash"}
+             </span>
+             <span className="text-xs text-slate-400 mt-1">.jpg, .png, .jpeg</span>
+             <input 
+               type="file" 
+               accept="image/*"
+               onChange={(e) => {
+                 const file = e.target.files[0];
+                 if (file) {
+                   setFormData(prev => ({ ...prev, image: URL.createObjectURL(file), file: file }));
+                 }
+               }}
+               className="hidden" 
+             />
+          </label>
+        </div>
+      </div>
+      
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Loyiha Nomi</label>
+        <input 
+          required 
+          type="text" 
+          name="projectname" 
+          value={formData.projectname} 
+          onChange={handleInputChange}
+          className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+          placeholder="Masalan: E-commerce Website..."
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Loyiha Tafsifi (Description)</label>
+        <textarea 
+          required 
+          rows="3" 
+          name="description" 
+          value={formData.description} 
+          onChange={handleInputChange}
+          className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm resize-none" 
+          placeholder="Loyiha haqida qisqacha ma'lumot va ishlatilgan texnologiyalar..."
+        ></textarea>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">GitHub Link</label>
+          <input 
+            type="url" 
+            name="codeLink" 
+            value={formData.codeLink} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            placeholder="https://github.com/..."
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Demo / Live Link</label>
+          <input 
+            type="url" 
+            name="demoLink" 
+            value={formData.demoLink} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            placeholder="https://myliveproject.com"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-4">
+         <button 
+           type="button" 
+           onClick={onCancel}
+           className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+         >
+           Bekor qilish
+         </button>
+         <button 
+           type="submit" 
+           className="px-6 py-3 rounded-xl text-sm font-bold bg-black text-white dark:bg-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-lg"
+         >
+           {buttonText}
+         </button>
+      </div>
+    </form>
+  </motion.div>
+);
 
 const Projects = () => {
   const { t } = useLang();
   
-  const [projects, setProjects] = useState(initialProjects);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -53,185 +145,131 @@ const Projects = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    title: '',
+    projectname: '',
     description: '',
-    githubLink: '',
+    codeLink: '',
     demoLink: '',
-    image: ''
+    image: '',
+    file: null
   });
 
-  const filteredProjects = projects.filter(proj => 
-    proj.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const res = await api.get('/project');
+      setProjects(res.data);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleOpenAdd = () => {
-    setFormData({ title: '', description: '', githubLink: '', demoLink: '', image: '' });
+    setFormData({ projectname: '', description: '', codeLink: '', demoLink: '', image: '', file: null });
     setIsAddModalOpen(true);
   };
 
   const handleOpenEdit = (proj) => {
     setCurrentProj(proj);
-    setFormData({ ...proj });
+    setFormData({ 
+        projectname: proj.projectname, 
+        description: proj.description, 
+        codeLink: proj.codeLink, 
+        demoLink: proj.demoLink, 
+        image: proj.image, 
+        file: null 
+    });
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if(window.confirm("Rostdan ham ushbu loyihani o'chirmoqchimisiz?")) {
-      setProjects(prev => prev.filter(p => p.id !== id));
+      try {
+        await api.delete(`/project/${id}`);
+        setProjects(prev => prev.filter(p => p._id !== id));
+      } catch (err) {
+        alert("Xatolik: " + err.message);
+      }
     }
   };
 
-  const handleToggleCV = (id) => {
-    setProjects(prev => {
-      const isCurrentlyCV = prev.find(p => p.id === id)?.isCV;
-      if (!isCurrentlyCV) {
-        // Checking limit
-        const cvCount = prev.filter(p => p.isCV).length;
-        if (cvCount >= 3) {
-          alert("CV uchun faqat 3 ta loyiha tanlash mumkin. Iltimos bittasini navbatdan olib tashlang.");
-          return prev;
-        }
+  const handleToggleCV = async (id) => {
+    const proj = projects.find(p => p._id === id);
+    const isCurrentlyCV = proj?.isCV;
+    
+    if (!isCurrentlyCV) {
+      const cvCount = projects.filter(p => p.isCV).length;
+      if (cvCount >= 3) {
+        alert("CV uchun faqat 3 ta loyiha tanlash mumkin. Iltimos bittasini navbatdan olib tashlang.");
+        return;
       }
-      return prev.map(p => p.id === id ? { ...p, isCV: !p.isCV } : p);
-    });
+    }
+
+    try {
+      const res = await api.put(`/project/${id}`, { isCV: !isCurrentlyCV });
+      setProjects(prev => prev.map(p => p._id === id ? res.data : p));
+    } catch (err) {
+      console.error("Error toggling CV status:", err);
+    }
   };
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
-    const newProj = { ...formData, id: Date.now() };
-    setProjects([newProj, ...projects]);
-    setIsAddModalOpen(false);
+    const data = new FormData();
+    data.append('projectname', formData.projectname);
+    data.append('description', formData.description);
+    data.append('codeLink', formData.codeLink);
+    data.append('demoLink', formData.demoLink);
+    if (formData.file) {
+      data.append('project_image', formData.file);
+    }
+
+    try {
+      const res = await api.post('/project', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setProjects([res.data, ...projects]);
+      setIsAddModalOpen(false);
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setProjects(prev => prev.map(p => p.id === currentProj.id ? { ...formData, id: currentProj.id } : p));
-    setIsEditModalOpen(false);
+    const data = new FormData();
+    data.append('projectname', formData.projectname);
+    data.append('description', formData.description);
+    data.append('codeLink', formData.codeLink);
+    data.append('demoLink', formData.demoLink);
+    if (formData.file) {
+      data.append('project_image', formData.file);
+    }
+
+    try {
+      const res = await api.put(`/project/${currentProj._id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setProjects(prev => prev.map(p => p._id === currentProj._id ? res.data : p));
+      setIsEditModalOpen(false);
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
   };
 
-  // Rendering the form to avoid duplication
-  const FormContent = ({ onSubmit, title, buttonText, onCancel }) => (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white dark:bg-[#0a0a0a] w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 relative border border-slate-200 dark:border-white/10 z-50 max-h-[90vh] overflow-y-auto"
-      onClick={e => e.stopPropagation()}
-    >
-      <button 
-        type="button" 
-        onClick={onCancel}
-        className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-      >
-        <XIcon />
-      </button>
-
-      <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-wider">{title}</h2>
-      
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Loyiha Surati</label>
-          <div className="flex items-center gap-4 w-full">
-            {formData.image && (
-              <img 
-                src={formData.image} 
-                alt="Preview" 
-                className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0" 
-              />
-            )}
-            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl px-4 py-4 cursor-pointer hover:border-black dark:hover:border-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-center">
-               <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                 {formData.image ? "Rasmni almashtirish" : "Loyiha suratini yuklash"}
-               </span>
-               <span className="text-xs text-slate-400 mt-1">.jpg, .png, .jpeg</span>
-               <input 
-                 type="file" 
-                 accept="image/*"
-                 onChange={(e) => {
-                   const file = e.target.files[0];
-                   if (file) {
-                     setFormData(prev => ({ ...prev, image: URL.createObjectURL(file), file: file }));
-                   }
-                 }}
-                 className="hidden" 
-               />
-            </label>
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Loyiha Nomi</label>
-          <input 
-            required 
-            type="text" 
-            name="title" 
-            value={formData.title} 
-            onChange={handleInputChange}
-            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
-            placeholder="Masalan: E-commerce Website..."
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Loyiha Tafsifi (Description)</label>
-          <textarea 
-            required 
-            rows="3" 
-            name="description" 
-            value={formData.description} 
-            onChange={handleInputChange}
-            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm resize-none" 
-            placeholder="Loyiha haqida qisqacha ma'lumot va ishlatilgan texnologiyalar..."
-          ></textarea>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">GitHub Link</label>
-            <input 
-              type="url" 
-              name="githubLink" 
-              value={formData.githubLink} 
-              onChange={handleInputChange}
-              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
-              placeholder="https://github.com/..."
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Demo / Live Link</label>
-            <input 
-              type="url" 
-              name="demoLink" 
-              value={formData.demoLink} 
-              onChange={handleInputChange}
-              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
-              placeholder="https://myliveproject.com"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-4">
-           <button 
-             type="button" 
-             onClick={onCancel}
-             className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
-           >
-             Bekor qilish
-           </button>
-           <button 
-             type="submit" 
-             className="px-6 py-3 rounded-xl text-sm font-bold bg-black text-white dark:bg-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-lg"
-           >
-             {buttonText}
-           </button>
-        </div>
-      </form>
-    </motion.div>
+  const filteredProjects = projects.filter(proj => 
+    proj.projectname?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) return <div className="flex items-center justify-center h-full text-slate-500">Yuklanmoqda...</div>;
 
   return (
     <motion.div 
@@ -287,7 +325,7 @@ const Projects = () => {
               layout
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              key={proj.id} 
+              key={proj._id} 
               className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
             >
               {/* Image Area */}
@@ -309,7 +347,7 @@ const Projects = () => {
                      <EditIcon />
                    </button>
                    <button 
-                     onClick={() => handleDelete(proj.id)}
+                     onClick={() => handleDelete(proj._id)}
                      className="w-8 h-8 rounded-full bg-white dark:bg-black text-red-500 flex items-center justify-center shadow-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
                      title="O'chirish"
                    >
@@ -322,7 +360,7 @@ const Projects = () => {
               <div className="p-5 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-tight uppercase tracking-tight">
-                    {proj.title}
+                    {proj.projectname}
                   </h3>
                 </div>
                 
@@ -359,7 +397,7 @@ const Projects = () => {
 
                 {/* CV Button at the bottom */}
                 <button 
-                  onClick={() => handleToggleCV(proj.id)}
+                  onClick={() => handleToggleCV(proj._id)}
                   className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition-colors font-semibold text-sm ${
                     proj.isCV 
                       ? 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' 
@@ -392,6 +430,9 @@ const Projects = () => {
               buttonText="Qo'shish" 
               onSubmit={handleAddSubmit} 
               onCancel={() => setIsAddModalOpen(false)} 
+              formData={formData}
+              setFormData={setFormData}
+              handleInputChange={handleInputChange}
             />
           </div>
         )}
@@ -410,6 +451,9 @@ const Projects = () => {
               buttonText="Saqlash" 
               onSubmit={handleEditSubmit} 
               onCancel={() => setIsEditModalOpen(false)} 
+              formData={formData}
+              setFormData={setFormData}
+              handleInputChange={handleInputChange}
             />
           </div>
         )}
