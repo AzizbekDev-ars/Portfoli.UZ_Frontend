@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 import PaymentModal from '../components/PaymentModal';
 
 const UpgradePlaceholder = ({ title, description, onUpgradeClick }) => (
@@ -21,7 +22,8 @@ const UpgradePlaceholder = ({ title, description, onUpgradeClick }) => (
 
 const CV = () => {
   const [selectedDesign, setSelectedDesign] = useState('modern');
-  const [isPro, setIsPro] = useState(false);
+  const { user, setUser } = useAuth();
+  const isPro = user?.isPro || false;
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   
   const [userData, setUserData] = useState(null);
@@ -32,14 +34,6 @@ const CV = () => {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("portfolioSettings");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setIsPro(!!parsed.isPro);
-    } else {
-      setIsPro(false);
-    }
-    
     if (isPro) {
       fetchData();
     } else {
@@ -82,14 +76,15 @@ const CV = () => {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setIsPaymentModalOpen(false);
-    setIsPro(true);
-    const saved = localStorage.getItem("portfolioSettings") || "{}";
-    const parsed = JSON.parse(saved);
-    parsed.isPro = true;
-    localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
-    alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data);
+      alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+    } catch (err) {
+      window.location.reload();
+    }
   };
 
   const designs = [

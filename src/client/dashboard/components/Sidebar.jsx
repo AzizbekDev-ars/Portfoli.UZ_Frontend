@@ -21,26 +21,7 @@ const CrownIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} str
 const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useLang();
   const { user } = useAuth();
-  const [isPro, setIsPro] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem("portfolioSettings");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setIsPro(!!parsed.isPro);
-      } else {
-        setIsPro(false);
-      }
-    };
-    handleStorageChange();
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('portfolioSettingsUpdate', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('portfolioSettingsUpdate', handleStorageChange);
-    };
-  }, []);
+  const isPro = user?.isPro || false;
 
   const menuItems = [
     { name: t.dashboard?.nav?.home || 'Home', path: '/dashboard', icon: icons.Home },

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../components/PaymentModal';
 import UpgradePlaceholder from '../components/UpgradePlaceholder';
@@ -26,18 +27,9 @@ const Visitors = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   
-  const [isPro, setIsPro] = useState(false);
+  const { user, setUser } = useAuth();
+  const isPro = user?.isPro || false;
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("portfolioSettings");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setIsPro(!!parsed.isPro);
-    } else {
-      setIsPro(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (isPro) {
@@ -68,14 +60,15 @@ const Visitors = () => {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setIsPaymentModalOpen(false);
-    setIsPro(true);
-    const saved = localStorage.getItem("portfolioSettings") || "{}";
-    const parsed = JSON.parse(saved);
-    parsed.isPro = true;
-    localStorage.setItem("portfolioSettings", JSON.stringify(parsed));
-    alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data);
+      alert("Tabriklaymiz! Siz endi PRO tarifidasiz 🎉");
+    } catch (err) {
+      window.location.reload(); // Fallback
+    }
   };
   
   // Filter States
