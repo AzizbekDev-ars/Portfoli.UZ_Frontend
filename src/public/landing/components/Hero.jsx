@@ -13,7 +13,7 @@ const Hero = ({ t }) => {
         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100/50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-bold shadow-sm backdrop-blur-md"
       >
         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-        Beta 1.0 Release
+        v0.2 Stable Release
       </motion.div>
 
       <motion.h1 

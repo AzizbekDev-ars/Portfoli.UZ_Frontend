@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
@@ -84,15 +85,15 @@ const Zamonaviy = ({ data, onSendMessage, onDownloadCV }) => {
       {/* NAVBAR */}
       <nav className={`fixed top-0 left-0 w-full z-50 ${isDark ? 'bg-[#030712]/80 border-cyan-500/20' : 'bg-white/80 border-slate-200'} backdrop-blur-xl border-b`}>
         <div className="container mx-auto px-6 h-20 flex justify-between items-center">
-          <div className="flex items-center gap-4 group cursor-pointer">
+          <Link to="/" className="flex items-center gap-4 group cursor-pointer">
              <div className="w-11 h-11 bg-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.5)] group-hover:rotate-12 transition-transform">
                 <Box className="text-black" size={24} />
              </div>
              <div className="flex flex-col">
                 <span className="text-xl font-black tracking-tighter uppercase italic leading-none">{data.firstName}</span>
-                <span className="text-[8px] font-black uppercase tracking-[0.4em] opacity-40 mt-1">Core Architecture</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] mt-1 text-slate-500">Core Architecture</span>
              </div>
-          </div>
+          </Link>
           
           <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.3em]">
             <a href="#about" className="hover:text-cyan-500 transition-all flex items-center gap-2 group">
@@ -214,32 +215,52 @@ const Zamonaviy = ({ data, onSendMessage, onDownloadCV }) => {
 
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {data.projects.map((proj, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -10 }} className="group">
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, y: 30 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, delay: i * 0.1 }}
+                    whileHover={{ y: -10 }} 
+                    className="group"
+                  >
                      <div className={`relative aspect-video rounded-tr-[4rem] overflow-hidden ${isDark ? 'bg-black border-cyan-500/20 shadow-[0_30px_60px_rgba(0,0,0,0.5)]' : 'bg-white border-slate-200 shadow-xl'} border mb-8 group-hover:border-cyan-500/60 transition-all duration-500`}>
                         <img src={proj.image || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop"} 
-                             className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" alt={proj.title} />
+                             className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" alt={proj.title} />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-80" />
                         
-                        <div className="absolute top-6 left-6 flex gap-2">
-                           {proj.tech?.split(',').slice(0, 2).map(tag => (
-                              <span key={tag} className="px-3 py-1 bg-black/50 backdrop-blur-md border border-cyan-500/20 text-[8px] font-black text-cyan-400 uppercase rounded-full">
+                        <div className="absolute top-6 left-6 flex flex-wrap gap-2">
+                           {proj.tech?.split(',').slice(0, 3).map(tag => (
+                              <span key={tag} className="px-3 py-1 bg-black/60 backdrop-blur-md border border-cyan-500/30 text-[8px] font-black text-cyan-400 uppercase rounded-full shadow-[0_0_10px_rgba(6,182,212,0.2)]">
                                  {tag.trim()}
                               </span>
                            ))}
                         </div>
+                        
+                        <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        <div className="absolute bottom-8 left-8 right-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                           <a href={proj.link} target="_blank" rel="noreferrer" className="w-full py-4 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 skew-x-[-10deg]">
-                              <span className="skew-x-[10deg] flex items-center gap-2">Initialize Deployment <ExternalLink size={14} /></span>
-                           </a>
+                        <div className="absolute bottom-8 left-8 right-8 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-10 flex gap-4">
+                           {proj.link && (
+                             <a href={proj.link} target="_blank" rel="noreferrer" className="flex-1 py-4 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 skew-x-[-10deg] hover:bg-white transition-colors shadow-lg">
+                                <span className="skew-x-[10deg] flex items-center gap-2">Protocol <ExternalLink size={14} /></span>
+                             </a>
+                           )}
+                           {proj.codeLink && (
+                             <a href={proj.codeLink} target="_blank" rel="noreferrer" className="flex-1 py-4 bg-black/60 backdrop-blur-md border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 skew-x-[-10deg] hover:bg-cyan-500 hover:text-black transition-colors shadow-lg">
+                                <span className="skew-x-[10deg] flex items-center gap-2">Code <Github size={14} /></span>
+                             </a>
+                           )}
                         </div>
                      </div>
                      <div className="flex justify-between items-start px-4">
-                        <div className="space-y-1">
-                           <h4 className="text-2xl font-black uppercase italic group-hover:text-cyan-500 transition-colors leading-none">{proj.title}</h4>
-                           <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{proj.tech}</p>
+                        <div className="space-y-2">
+                           <h4 className="text-2xl font-black uppercase italic group-hover:text-cyan-500 transition-colors leading-none tracking-tight">{proj.title}</h4>
+                           <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" />
+                              <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{proj.tech}</p>
+                           </div>
                         </div>
-                        <span className="text-[10px] font-black text-cyan-500/40">v1.0.{i}</span>
+                        <span className="text-[10px] font-black text-cyan-500/40 border border-cyan-500/20 px-2 py-0.5 rounded">v{1 + (i % 3)}.0.{i}</span>
                      </div>
                   </motion.div>
                 ))}
@@ -279,18 +300,28 @@ const Zamonaviy = ({ data, onSendMessage, onDownloadCV }) => {
                     <div className="flex-1 h-[2px] bg-gradient-to-r from-cyan-500/30 to-transparent"></div>
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    {data.certificates.map((cert, i) => (
-                      <div key={i} className={`p-10 border ${isDark ? 'bg-[#030712] border-cyan-500/10' : 'bg-slate-50 border-slate-200'} rounded-[2.5rem] hover:border-cyan-500/60 transition-all group relative overflow-hidden shadow-xl`}>
-                         <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
-                         <Code className="text-cyan-500/30 mb-8 group-hover:text-cyan-500 transition-colors" size={32} />
-                         <h4 className="font-black text-[10px] uppercase tracking-[0.3em] mb-3 text-cyan-500">{cert.issuer}</h4>
-                         <p className="font-black text-xl leading-tight group-hover:text-cyan-400 transition-colors italic">{cert.title}</p>
-                         <div className="mt-8 flex items-center justify-between opacity-40 text-[10px] font-bold">
-                            <span>{cert.date}</span>
-                            <ChevronRight size={14} />
-                         </div>
-                      </div>
-                    ))}
+                    {data.certificates.map((cert, i) => {
+                      const CardContent = (
+                        <div className={`p-10 border ${isDark ? 'bg-[#030712] border-cyan-500/10' : 'bg-slate-50 border-slate-200'} rounded-[2.5rem] hover:border-cyan-500/60 transition-all group relative overflow-hidden shadow-xl`}>
+                           <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
+                           <Code className="text-cyan-500/30 mb-8 group-hover:text-cyan-500 transition-colors" size={32} />
+                           <h4 className="font-black text-[10px] uppercase tracking-[0.3em] mb-3 text-cyan-500">{cert.issuer}</h4>
+                           <p className="font-black text-xl leading-tight group-hover:text-cyan-400 transition-colors italic">{cert.title}</p>
+                           <div className="mt-8 flex items-center justify-between opacity-40 text-[10px] font-bold">
+                              <span>{cert.date}</span>
+                              {cert.url ? <ExternalLink size={14} /> : <ChevronRight size={14} />}
+                           </div>
+                        </div>
+                      );
+
+                      return cert.url ? (
+                        <a key={i} href={cert.url} target="_blank" rel="noopener noreferrer" className="block">
+                          {CardContent}
+                        </a>
+                      ) : (
+                        <div key={i}>{CardContent}</div>
+                      );
+                    })}
                  </div>
 
                  {/* Tech HUD */}

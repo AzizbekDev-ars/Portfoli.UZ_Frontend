@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
@@ -101,10 +102,10 @@ const Animatsion = ({ data, onSendMessage, onDownloadCV }) => {
 
       {/* NAV BAR */}
       <nav className={`fixed top-0 w-full z-50 px-8 py-8 flex justify-between items-center ${isDark ? 'mix-blend-difference' : ''}`}>
-         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-2xl font-black tracking-tighter uppercase italic flex items-center gap-2">
-            <Cpu className="text-[#4F46E5]" />
+         <Link to="/" className="text-2xl font-black tracking-tighter uppercase italic flex items-center gap-2 group cursor-pointer">
+            <Cpu className="text-[#4F46E5] group-hover:rotate-12 transition-transform" />
             <span>{data.firstName}<span className="text-[#4F46E5]">.</span>lab</span>
-         </motion.div>
+         </Link>
          <div className="flex items-center gap-8 bg-white/10 dark:bg-black/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20">
             <select value={lang} onChange={(e) => setLang(e.target.value)} className={`bg-transparent border-none text-[10px] font-black outline-none cursor-pointer uppercase tracking-[0.2em] ${isDark ? 'text-white' : 'text-black'}`}>
                <option className="text-black" value="uz">UZ</option><option className="text-black" value="ru">RU</option><option className="text-black" value="en">EN</option>

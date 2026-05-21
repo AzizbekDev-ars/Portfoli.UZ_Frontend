@@ -2,6 +2,10 @@ import { Routes, Route } from 'react-router-dom'
 import LandingPage from '../public/landing/LandingPage'
 import Login from '../client/auth/Login'
 import Register from '../client/auth/Register'
+import ForgotPassword from '../client/auth/ForgotPassword'
+import ResetPassword from '../client/auth/ResetPassword'
+import SelectDesignPage from '../client/auth/SelectDesignPage'
+
 
 import ProtectedRoute from '../Protect/ProtectedRoute'
 import DashboardLayout from '../client/dashboard/DashboardLayout'
@@ -23,13 +27,22 @@ import AdminHome from '../admin/dashboard/pages/AdminHome'
 import AdminUsers from '../admin/dashboard/pages/AdminUsers'
 import AdminFinancial from '../admin/dashboard/pages/AdminFinancial'
 import AdminSettings from '../admin/dashboard/pages/AdminSettings'
+import AdminSupport from '../admin/dashboard/pages/AdminSupport'
+import AdminVisitors from '../admin/dashboard/pages/AdminVisitors'
+import usePageTracking from '../hooks/usePageTracking'
 
 const MainRoute = () => {
+  usePageTracking();
   return (
+
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/select-design" element={<SelectDesignPage />} />
+
 
       {/* SUPER ADMIN ROUTES */}
       <Route path="/admin" element={<AdminLogin />} />
@@ -45,7 +58,10 @@ const MainRoute = () => {
         <Route path="users" element={<AdminUsers />} />
         <Route path="financial" element={<AdminFinancial />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="support" element={<AdminSupport />} />
+        <Route path="visitors" element={<AdminVisitors />} />
       </Route>
+
 
       {/* DASHBOARD ROUTES */}
       <Route 

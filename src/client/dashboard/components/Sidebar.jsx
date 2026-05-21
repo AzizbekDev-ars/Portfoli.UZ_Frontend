@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useLang } from '../../../contexts/LangContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,14 +37,14 @@ const Sidebar = ({ isOpen, onClose }) => {
   const SidebarContent = () => (
     <>
       <div className="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/10 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-105 transition-transform">
             P
           </div>
           <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
             Portfolio.UZ
           </span>
-        </div>
+        </Link>
         <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

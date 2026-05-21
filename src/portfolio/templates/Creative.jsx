@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
@@ -80,12 +81,12 @@ const Creative = ({ data, onSendMessage, onDownloadCV }) => {
 
       {/* NAVBAR */}
       <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-8 bg-white/20 dark:bg-black/20 backdrop-blur-xl px-10 py-5 rounded-full border-4 border-black shadow-[8px_8px_0px_#000]">
-         <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-[#FFD700] rounded-lg border-2 border-black flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_#000]">
+         <Link to="/" className="flex items-center gap-4 group">
+            <div className="w-10 h-10 bg-[#FFD700] rounded-lg border-2 border-black flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_#000] group-hover:scale-105 transition-transform">
                {data.firstName[0]}
             </div>
             <span className="text-sm font-black uppercase tracking-widest hidden md:block">{data.firstName}</span>
-         </div>
+         </Link>
          <div className="flex items-center gap-6">
             <button onClick={() => setIsDark(!isDark)} className="p-2 bg-white dark:bg-slate-800 border-2 border-black rounded-lg shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
                {isDark ? <Zap className="text-yellow-400" size={18} /> : <Palette className="text-blue-500" size={18} />}
@@ -150,7 +151,14 @@ const Creative = ({ data, onSendMessage, onDownloadCV }) => {
                            <Rocket size={48} className="mb-6 -rotate-45" />
                            <h3 className="text-4xl font-black uppercase italic mb-4">{proj.title}</h3>
                            <p className="text-sm font-bold opacity-80 mb-8">{proj.tech}</p>
-                           <a href={proj.link} target="_blank" rel="noreferrer" className="px-8 py-3 bg-white text-black font-black uppercase text-xs rounded-xl border-2 border-black">Explore Work</a>
+                           <div className="flex gap-4">
+                              {proj.link && (
+                                <a href={proj.link} target="_blank" rel="noreferrer" className="px-6 py-3 bg-white text-black font-black uppercase text-xs rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors">Demo</a>
+                              )}
+                              {proj.codeLink && (
+                                <a href={proj.codeLink} target="_blank" rel="noreferrer" className="px-6 py-3 bg-white text-black font-black uppercase text-xs rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2"><Github size={14}/> Code</a>
+                              )}
+                           </div>
                         </div>
                      </div>
                      <div className="mt-10 px-4 flex justify-between items-center">

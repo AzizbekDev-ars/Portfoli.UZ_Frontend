@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang } from '../../../contexts/LangContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import api from '../../../services/api';
 
 // Icons
@@ -13,7 +14,10 @@ const ExternalLinkIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth=
 const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
 // Separate Form Component to avoid re-renders on input
-const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormData, handleInputChange }) => (
+const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormData, handleInputChange }) => {
+  const isOngoing = formData.isOngoing;
+
+  return (
   <motion.div 
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -90,7 +94,7 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormD
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">GitHub Link</label>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">GitHub Link (Ixtiyoriy)</label>
           <input 
             type="url" 
             name="codeLink" 
@@ -101,7 +105,7 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormD
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Demo / Live Link</label>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Demo / Live Link (Ixtiyoriy)</label>
           <input 
             type="url" 
             name="demoLink" 
@@ -110,6 +114,44 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormD
             className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
             placeholder="https://myliveproject.com"
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Boshlanish Sanasi (Ixtiyoriy)</label>
+          <input 
+            type="date" 
+            name="startDate" 
+            value={formData.startDate} 
+            onChange={handleInputChange}
+            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
+          />
+        </div>
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tugash Sanasi</label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+              <input 
+                type="checkbox" 
+                checked={isOngoing}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, isOngoing: e.target.checked }));
+                }}
+                className="rounded border-slate-300 dark:border-white/20 text-black dark:text-white focus:ring-black dark:focus:ring-white"
+              />
+              Hali tugallanmagan
+            </label>
+          </div>
+          {!isOngoing && (
+            <input 
+              type="date" 
+              name="endDate" 
+              value={formData.endDate} 
+              onChange={handleInputChange}
+              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
+            />
+          )}
         </div>
       </div>
 
@@ -130,10 +172,12 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, setFormD
       </div>
     </form>
   </motion.div>
-);
+  );
+};
 
 const Projects = () => {
   const { t } = useLang();
+  const { user } = useAuth();
   
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -149,6 +193,9 @@ const Projects = () => {
     description: '',
     codeLink: '',
     demoLink: '',
+    startDate: '',
+    endDate: '',
+    isOngoing: false,
     image: '',
     file: null
   });
@@ -172,9 +219,25 @@ const Projects = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleOpenAdd = () => {
-    setFormData({ projectname: '', description: '', codeLink: '', demoLink: '', image: '', file: null });
-    setIsAddModalOpen(true);
+  const handleOpenAdd = async () => {
+    try {
+      // Limit tekshiruvi
+      if (!user?.isPro) {
+        const settingsRes = await api.get('/platform/settings');
+        const limit = settingsRes.data.freeProjectsLimit || 3;
+        if (projects.length >= limit) {
+          alert(`Siz bepul tarifdasiz va loyihalar limiti (${limit}) ga yetdingiz. Iltimos, PRO tarifga o'ting!`);
+          return;
+        }
+      }
+      setFormData({ projectname: '', description: '', codeLink: '', demoLink: '', startDate: '', endDate: '', isOngoing: false, image: '', file: null });
+      setIsAddModalOpen(true);
+    } catch (err) {
+      console.error("Limit check failed:", err);
+      // Xatolik bo'lsa ham ochishga ruxsat beramiz yoki alert beramiz
+      setFormData({ projectname: '', description: '', codeLink: '', demoLink: '', startDate: '', endDate: '', isOngoing: false, image: '', file: null });
+      setIsAddModalOpen(true);
+    }
   };
 
   const handleOpenEdit = (proj) => {
@@ -182,9 +245,12 @@ const Projects = () => {
     setFormData({ 
         projectname: proj.projectname, 
         description: proj.description, 
-        codeLink: proj.codeLink, 
-        demoLink: proj.demoLink, 
-        image: proj.image, 
+        codeLink: proj.codeLink || '', 
+        demoLink: proj.demoLink || '', 
+        startDate: proj.startDate || '',
+        endDate: proj.endDate || '',
+        isOngoing: proj.isOngoing || false,
+        image: proj.image || '', 
         file: null 
     });
     setIsEditModalOpen(true);
@@ -228,6 +294,9 @@ const Projects = () => {
     data.append('description', formData.description);
     data.append('codeLink', formData.codeLink);
     data.append('demoLink', formData.demoLink);
+    data.append('startDate', formData.startDate);
+    data.append('endDate', formData.endDate);
+    data.append('isOngoing', formData.isOngoing);
     if (formData.file) {
       data.append('project_image', formData.file);
     }
@@ -250,6 +319,9 @@ const Projects = () => {
     data.append('description', formData.description);
     data.append('codeLink', formData.codeLink);
     data.append('demoLink', formData.demoLink);
+    data.append('startDate', formData.startDate);
+    data.append('endDate', formData.endDate);
+    data.append('isOngoing', formData.isOngoing);
     if (formData.file) {
       data.append('project_image', formData.file);
     }

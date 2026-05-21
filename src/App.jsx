@@ -3,10 +3,12 @@ import MainRoute from './mainRoutes/MainRoute';
 import api from './services/api';
 import Maintenance from './public/Maintenance';
 import { useAuth } from './contexts/AuthContext';
+import GlobalBanner from './components/GlobalBanner';
 
 function App() {
   const { user } = useAuth();
   const [maintenance, setMaintenance] = useState(false);
+  const [bannerData, setBannerData] = useState({ active: false, text: '' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,6 +17,7 @@ function App() {
         const res = await api.get('/platform/settings');
         const s = res.data;
         setMaintenance(s.maintenanceMode);
+        setBannerData({ active: s.bannerActive, text: s.bannerText });
         
         // Dinamik sarlavha va meta ma'lumotlar
         if (s.siteName) document.title = s.siteName;
@@ -37,7 +40,12 @@ function App() {
     return <Maintenance />;
   }
 
-  return <MainRoute />;
+  return (
+    <>
+      <GlobalBanner active={bannerData.active} text={bannerData.text} />
+      <MainRoute />
+    </>
+  );
 }
 
 export default App;

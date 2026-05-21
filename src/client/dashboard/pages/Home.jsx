@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../../../contexts/LangContext';
 import api from '../../../services/api';
@@ -17,6 +17,7 @@ const Home = () => {
   const [unreadMessages, setUnreadMessages] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAllNews, setShowAllNews] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,12 +60,7 @@ const Home = () => {
   };
 
   // Multi-language labels for modified cards
-  const labels = {
-    uz: { unique: "Tashrif buyuruvchilar", msgs: "Barcha xabarlar" },
-    ru: { unique: "Посетители", msgs: "Все сообщения" },
-    en: { unique: "Total Visitors", msgs: "All Messages" }
-  };
-  const curL = labels[lang] || labels['uz'];
+  const curL = t.dashboard?.home || {};
 
   return (
     <motion.div 
@@ -97,7 +93,7 @@ const Home = () => {
              <UsersIcon />
           </div>
           <div className="min-w-0 w-full">
-            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{curL.unique}</p>
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{curL.totalVisitors}</p>
             <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{stats.unique}</p>
           </div>
         </div>
@@ -110,7 +106,7 @@ const Home = () => {
              <MailIcon />
           </div>
           <div className="min-w-0 w-full">
-            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{curL.msgs}</p>
+            <p className="text-[10px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{curL.allMessages}</p>
             <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{stats.messages}</p>
           </div>
         </div>
@@ -132,9 +128,19 @@ const Home = () => {
         
         {/* LEFT COLUMN: News/Video */}
         <div className="lg:col-span-2 bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4">
-            {t.dashboard?.home?.newsTitle || 'Yaratuvchilardan yangiliklar'}
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+              {t.dashboard?.home?.newsTitle || 'Yaratuvchilardan yangiliklar'}
+            </h2>
+            {announcements.length > 1 && (
+              <button 
+                onClick={() => setShowAllNews(true)}
+                className="text-xs font-bold px-3 py-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-500/20 transition-all"
+              >
+                {t.dashboard?.home?.allNews || "Barcha yangiliklar"}
+              </button>
+            )}
+          </div>
           
           {latestNews ? (
             <>
@@ -149,7 +155,7 @@ const Home = () => {
                     allowFullScreen
                   ></iframe>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-500">Video mavjud emas</div>
+                  <div className="w-full h-full flex items-center justify-center text-slate-500">{t.dashboard.common.noData}</div>
                 )}
               </div>
 
@@ -165,7 +171,7 @@ const Home = () => {
                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
                </div>
-               <p className="font-medium">{lang === 'uz' ? "Hozircha yangiliklar yo'q" : "Пока новостей нет"}</p>
+               <p className="font-medium">{t.dashboard.common.noData}</p>
             </div>
           )}
         </div>
@@ -214,6 +220,70 @@ const Home = () => {
         </div>
 
       </div>
+
+      {/* --- ALL NEWS MODAL --- */}
+      <AnimatePresence>
+        {showAllNews && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAllNews(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-4xl max-h-[80vh] bg-white dark:bg-[#0f172a] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-white/10"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/5">
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  {t.dashboard?.home?.allNews || "Barcha yangiliklar"}
+                </h2>
+                <button 
+                  onClick={() => setShowAllNews(false)}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-rose-500 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                {announcements.map((news) => (
+                  <div key={news._id} className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8 border-b border-slate-100 dark:border-white/5 last:border-0">
+                    <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg relative">
+                      {getYoutubeEmbed(news.youtubeUrl) ? (
+                        <iframe 
+                          className="w-full h-full absolute top-0 left-0"
+                          src={`https://www.youtube.com/embed/${getYoutubeEmbed(news.youtubeUrl)}`}
+                          title={news.title}
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-500">Video mavjud emas</div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{news.title}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap line-clamp-6">
+                        {news.description}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-4">
+                        {new Date(news.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
 
     </motion.div>
   );

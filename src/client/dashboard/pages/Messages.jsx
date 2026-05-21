@@ -26,6 +26,13 @@ const Messages = () => {
   const [filterRead, setFilterRead] = useState('all'); // all, read, unread
   const [filterLiked, setFilterLiked] = useState('all'); // all, liked, unliked
 
+  // Support Modal States
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [supportData, setSupportData] = useState({ subject: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  
+  const msgT = t.dashboard?.messages || {};
+
   useEffect(() => {
     fetchMessages();
   }, []);
@@ -78,13 +85,28 @@ const Messages = () => {
   const toggleLike = (id) => setMessages(messages.map(m => m._id === id ? { ...m, isLiked: !m.isLiked } : m));
 
   const deleteMessage = async (id) => {
-    if(window.confirm("Rostdan ham ushbu xabarni o'chirmoqchimisiz?")) {
+    if(window.confirm(msgT.deleteConfirm || "Rostdan ham ushbu xabarni o'chirmoqchimisiz?")) {
       try {
         await api.delete(`/message/${id}`);
         setMessages(messages.filter(m => m._id !== id));
       } catch (err) {
         alert("Xatolik: " + err.message);
       }
+    }
+  };
+
+  const handleSupportSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post('/support', supportData);
+      alert(t.dashboard?.messages?.supportSuccess || "Habaringiz yuborildi!");
+      setSupportData({ subject: '', message: '' });
+      setShowSupportModal(false);
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -100,6 +122,87 @@ const Messages = () => {
       transition={{ duration: 0.5 }}
       className="w-full space-y-6 pb-12"
     >
+      {/* Support / Bug Report Section */}
+      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 rounded-3xl shadow-lg shadow-indigo-500/20 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
+        <div className="relative z-10">
+          <h3 className="text-xl font-black text-white mb-1">
+            {t.dashboard?.messages?.supportTitle || "Tizimda muammo bormi?"}
+          </h3>
+          <p className="text-indigo-100 text-sm max-w-md">
+            {t.dashboard?.messages?.supportDesc || "Saytdagi muammo va kamchiliklar haqida bizga habar bering. Biz ularni tez orada bartaraf etamiz."}
+          </p>
+        </div>
+        <button 
+          onClick={() => setShowSupportModal(true)}
+          className="relative z-10 px-6 py-3 bg-white text-indigo-600 font-bold rounded-2xl hover:bg-indigo-50 transition-all shadow-xl hover:shadow-white/20 active:scale-95 shrink-0"
+        >
+          {t.dashboard?.messages?.supportBtn || "Habar yozish"}
+        </button>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 rounded-full -ml-10 -mb-10 blur-2xl"></div>
+      </div>
+
+      {/* Support Modal */}
+      <AnimatePresence>
+        {showSupportModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowSupportModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-white dark:bg-[#0f172a] rounded-3xl shadow-2xl p-8 border border-slate-200 dark:border-white/10"
+            >
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6">
+                {t.dashboard?.messages?.supportModalTitle || "Adminga habar yo'llash"}
+              </h2>
+              <form onSubmit={handleSupportSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">{t.dashboard?.messages?.subject || "Mavzu"}</label>
+                  <input 
+                    required
+                    type="text" 
+                    value={supportData.subject}
+                    onChange={(e) => setSupportData({...supportData, subject: e.target.value})}
+                    placeholder={t.dashboard?.messages?.subjectPlaceholder || "Muammo haqida qisqacha..."}
+                    className="w-full bg-slate-100 dark:bg-white/5 px-4 py-3 rounded-xl border border-transparent focus:border-indigo-500 outline-none text-slate-800 dark:text-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">{t.dashboard?.messages?.message || "Habar matni"}</label>
+                  <textarea 
+                    required
+                    rows="4"
+                    value={supportData.message}
+                    onChange={(e) => setSupportData({...supportData, message: e.target.value})}
+                    placeholder={t.dashboard?.messages?.messagePlaceholder || "Batafsil tushuntiring..."}
+                    className="w-full bg-slate-100 dark:bg-white/5 px-4 py-3 rounded-xl border border-transparent focus:border-indigo-500 outline-none text-slate-800 dark:text-white transition-all resize-none"
+                  ></textarea>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button 
+                    type="button" onClick={() => setShowSupportModal(false)}
+                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
+                  >
+                    {t.dashboard.common.cancel}
+                  </button>
+                  <button 
+                    type="submit" disabled={submitting}
+                    className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                  >
+                    {submitting ? t.dashboard.common.saving : t.dashboard.common.send}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Header & Filters */}
       <div className="bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -108,7 +211,7 @@ const Messages = () => {
             <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 p-2 rounded-xl">
               <EnvelopeClosedIcon />
             </span>
-            Xabarlar
+            {msgT.title}
           </h2>
 
           {/* Search */}
@@ -118,7 +221,7 @@ const Messages = () => {
             </div>
             <input 
               type="text" 
-              placeholder="Ism, email yoki matn bo'yicha qidiruv..."
+              placeholder={msgT.search}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-slate-100 dark:bg-white/5 pl-10 pr-4 py-2.5 rounded-xl border border-transparent focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 transition-all"
@@ -129,33 +232,33 @@ const Messages = () => {
         {/* Filter Options */}
         <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-white/10">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
-            <FilterIcon /> Filtrlar:
+            <FilterIcon /> {msgT.filterTitle}
           </div>
 
           <select 
             value={sortDate} onChange={(e) => setSortDate(e.target.value)}
             className="bg-slate-100 dark:bg-white/5 text-sm text-slate-700 dark:text-slate-200 outline-none px-3 py-2 rounded-xl focus:border-indigo-500 cursor-pointer"
           >
-            <option className="text-slate-900" value="desc">Eng yangilari</option>
-            <option className="text-slate-900" value="asc">Eng eskilar</option>
+            <option className="text-slate-900" value="desc">{msgT.sortLatest}</option>
+            <option className="text-slate-900" value="asc">{msgT.sortOldest}</option>
           </select>
 
           <select 
             value={filterRead} onChange={(e) => setFilterRead(e.target.value)}
             className="bg-slate-100 dark:bg-white/5 text-sm text-slate-700 dark:text-slate-200 outline-none px-3 py-2 rounded-xl focus:border-indigo-500 cursor-pointer"
           >
-            <option className="text-slate-900" value="all">Barcha xabarlar</option>
-            <option className="text-slate-900" value="unread">O'qilmagan</option>
-            <option className="text-slate-900" value="read">O'qilgan</option>
+            <option className="text-slate-900" value="all">{msgT.allMessages}</option>
+            <option className="text-slate-900" value="unread">{msgT.unread}</option>
+            <option className="text-slate-900" value="read">{msgT.read}</option>
           </select>
 
           <select 
             value={filterLiked} onChange={(e) => setFilterLiked(e.target.value)}
             className="bg-slate-100 dark:bg-white/5 text-sm text-slate-700 dark:text-slate-200 outline-none px-3 py-2 rounded-xl focus:border-indigo-500 cursor-pointer"
           >
-            <option className="text-slate-900" value="all">Barchasi (Like)</option>
-            <option className="text-slate-900" value="liked">Yoqtirilganlar</option>
-            <option className="text-slate-900" value="unliked">Yoqtirilmaganlar</option>
+            <option className="text-slate-900" value="all">{msgT.allLiked}</option>
+            <option className="text-slate-900" value="liked">{msgT.liked}</option>
+            <option className="text-slate-900" value="unliked">{msgT.unliked}</option>
           </select>
         </div>
       </div>
@@ -244,7 +347,7 @@ const Messages = () => {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="text-center py-20 text-slate-500 dark:text-slate-400"
             >
-              Mos keluvchi xabarlar topilmadi.
+              {msgT.noMessages}
             </motion.div>
           )}
         </AnimatePresence>

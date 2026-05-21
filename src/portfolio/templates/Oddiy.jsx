@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
@@ -68,10 +69,10 @@ const Oddiy = ({ data, onSendMessage, onDownloadCV }) => {
       
       {/* NAVBAR */}
       <nav className={`fixed top-0 w-full z-50 border-b transition-colors duration-500 ${isDark ? 'bg-[#0F1115]/80 border-white/5' : 'bg-white/80 border-slate-100'} backdrop-blur-md px-6 md:px-20 h-20 flex justify-between items-center`}>
-        <div className="text-sm font-black uppercase tracking-tighter flex items-center gap-2">
-          <div className="w-2 h-2 bg-black dark:bg-white rounded-full" />
+        <Link to="/" className="text-sm font-black uppercase tracking-tighter flex items-center gap-2 group">
+          <div className="w-2 h-2 bg-black dark:bg-white rounded-full group-hover:scale-150 transition-transform" />
           {data.firstName} {data.lastName}
-        </div>
+        </Link>
         <div className="flex items-center gap-8">
           <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-slate-400">
              <a href="#projects" className="hover:text-black dark:hover:text-white transition-colors">{t.proj}</a>
@@ -146,10 +147,17 @@ const Oddiy = ({ data, onSendMessage, onDownloadCV }) => {
                           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                           alt={proj.title} 
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                           <a href={proj.link} className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform">
-                              <ExternalLink size={20} />
-                           </a>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                           {proj.link && (
+                             <a href={proj.link} className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform" title="Demo">
+                                <ExternalLink size={20} />
+                             </a>
+                           )}
+                           {proj.codeLink && (
+                             <a href={proj.codeLink} className="w-14 h-14 bg-[#0F1115] border border-white/20 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform" title="Code">
+                                <Github size={20} />
+                             </a>
+                           )}
                         </div>
                     </div>
                     <div className="px-2">
@@ -164,9 +172,18 @@ const Oddiy = ({ data, onSendMessage, onDownloadCV }) => {
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
                            {proj.description}
                         </p>
-                        <a href={proj.link} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:gap-4 transition-all">
-                           Explore Project <ArrowRight size={14} />
-                        </a>
+                        <div className="flex gap-6 mt-6">
+                           {proj.link && (
+                             <a href={proj.link} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:gap-4 transition-all text-slate-900 dark:text-white">
+                                Explore Project <ArrowRight size={14} />
+                             </a>
+                           )}
+                           {!proj.link && proj.codeLink && (
+                             <a href={proj.codeLink} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:gap-4 transition-all text-slate-900 dark:text-white">
+                                View Source <ArrowRight size={14} />
+                             </a>
+                           )}
+                        </div>
                     </div>
                   </motion.div>
                 ))}

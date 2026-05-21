@@ -12,9 +12,9 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // If user is logged in but hasn't selected a template, force them to the selection screen
-  if (user && !user.selectedTemplate) {
-    return <Navigate to="/register" replace />;
+  // If user is logged in, let them through
+  if (token) {
+    return children;
   }
 
   return children;

@@ -14,7 +14,10 @@ const BriefcaseIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={1}
 const XIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
 // Separate Form Component
-const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, handleInputChange }) => (
+const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, handleInputChange, setFormData }) => {
+  const isPresent = formData.endDate === 'Hozirgacha';
+
+  return (
   <motion.div 
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -74,15 +77,34 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, handleIn
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Tugash Sanasi</label>
-          <input 
-            required 
-            type="date" 
-            name="endDate" 
-            value={formData.endDate} 
-            onChange={handleInputChange}
-            className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
-          />
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tugash Sanasi</label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+              <input 
+                type="checkbox" 
+                checked={isPresent}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setFormData(prev => ({ ...prev, endDate: 'Hozirgacha' }));
+                  } else {
+                    setFormData(prev => ({ ...prev, endDate: '' }));
+                  }
+                }}
+                className="rounded border-slate-300 dark:border-white/20 text-black dark:text-white focus:ring-black dark:focus:ring-white"
+              />
+              Hozirgacha
+            </label>
+          </div>
+          {!isPresent && (
+            <input 
+              required 
+              type="date" 
+              name="endDate" 
+              value={formData.endDate} 
+              onChange={handleInputChange}
+              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm [color-scheme:light] dark:[color-scheme:dark]" 
+            />
+          )}
         </div>
       </div>
 
@@ -116,7 +138,8 @@ const FormContent = ({ onSubmit, title, buttonText, onCancel, formData, handleIn
       </div>
     </form>
   </motion.div>
-);
+  );
+};
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -374,6 +397,7 @@ const Experiences = () => {
               onCancel={() => setIsAddModalOpen(false)} 
               formData={formData}
               handleInputChange={handleInputChange}
+              setFormData={setFormData}
             />
           </div>
         )}
@@ -394,6 +418,7 @@ const Experiences = () => {
               onCancel={() => setIsEditModalOpen(false)} 
               formData={formData}
               handleInputChange={handleInputChange}
+              setFormData={setFormData}
             />
           </div>
         )}

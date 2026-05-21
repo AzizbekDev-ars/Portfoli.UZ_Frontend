@@ -4,6 +4,7 @@ import { useLang } from '../../../contexts/LangContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import PaymentModal from '../components/PaymentModal';
 import api from '../../../services/api';
+import CustomDesignBuilder from '../components/CustomDesignBuilder';
 
 // Icons
 const SaveIcon = () => <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -32,11 +33,13 @@ const Settings = () => {
     website: "",
     passwords: { current: "", new: "", confirm: "" },
     avatar: "",
-    showAvatarOnPortfolio: true
+    showAvatarOnPortfolio: true,
+    customDesign: null
   });
   const [loading, setLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -62,7 +65,8 @@ const Settings = () => {
         instagram: user.socialLinks?.instagram || "",
         twitter: user.socialLinks?.twitter || "",
         website: user.socialLinks?.website || "",
-        passwords: { current: "", new: "", confirm: "" }
+        passwords: { current: "", new: "", confirm: "" },
+        customDesign: user.customDesign || null
       });
     } catch (err) {
       console.error("Error fetching profile:", err);
@@ -133,7 +137,18 @@ const Settings = () => {
       'Creative': 'creative',
       'Animatsion': 'animated'
     };
-    setSettings(prev => ({ ...prev, selectedTemplate: designMap[designLabel] || designLabel.toLowerCase() }));
+    const selectedId = designMap[designLabel] || designLabel.toLowerCase();
+
+    if (selectedId === 'special') {
+      if (!settings.isPro) {
+        setIsPaymentModalOpen(true);
+        return;
+      }
+      setIsBuilderOpen(true);
+      return;
+    }
+
+    setSettings(prev => ({ ...prev, selectedTemplate: selectedId }));
     setHasChanges(true);
   };
 
@@ -548,6 +563,16 @@ const Settings = () => {
         isOpen={isPaymentModalOpen} 
         onClose={() => setIsPaymentModalOpen(false)} 
         onSuccess={handlePaymentSuccess} 
+      />
+
+      <CustomDesignBuilder 
+        isOpen={isBuilderOpen}
+        onClose={() => setIsBuilderOpen(false)}
+        initialSettings={settings.customDesign}
+        onSave={(newDesign) => {
+          setSettings(prev => ({...prev, customDesign: newDesign, selectedTemplate: 'special'}));
+          fetchProfile(); // to sync everything
+        }}
       />
     </motion.div>
   );

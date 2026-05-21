@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { useLang } from '../../contexts/LangContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +12,7 @@ const SunIcon = () => <svg className="w-5 h-5 cursor-pointer text-amber-500" fil
 const Login = () => {
   const { t, lang, setLang } = useLang();
   const { isDark, setIsDark } = useTheme();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -89,6 +90,11 @@ const Login = () => {
                 value={password} onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <div className="flex items-center justify-end">
+              <Link to="/forgot-password" title="Parolni tiklash" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
+                {lang === 'uz' ? "Parolni unutdingizmi?" : lang === 'ru' ? "Забыli пароль?" : "Forgot password?"}
+              </Link>
+            </div>
           </div>
 
           <div>
@@ -99,6 +105,30 @@ const Login = () => {
               {t.auth.btnLogin}
             </button>
           </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200 dark:border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-[#121826] text-slate-500">{lang === 'uz' ? "Yoki" : "Или"}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={credentialResponse => {
+                googleLogin(credentialResponse.credential)
+                  .then(() => navigate('/dashboard'))
+                  .catch(err => setStatus('Error: ' + err.message));
+              }}
+              onError={() => setStatus('Google login failed')}
+              useOneTap
+              theme={isDark ? "filled_black" : "outline"}
+              shape="pill"
+            />
+          </div>
+
           {status && <p className="text-sm text-center text-indigo-500">{status}</p>}
         </form>
 
