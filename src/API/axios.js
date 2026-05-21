@@ -3,7 +3,7 @@ import axios from 'axios';
 // Odatiy so'rovlar uchun mijoz (Client) API nusxasi
 const apiClient = axios.create({
   // baseURL ni ehtiyojingizga qarab qo'shishingiz mumkin, masalan: 
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://portfoliuzbackend-production.up.railway.app/'
 });
 
 // apiClient so'rovni yuborishdan oldin token bormi tekshiradi
@@ -20,7 +20,7 @@ apiClient.interceptors.request.use((config) => {
 
 // Admin huquqlari uchun API nusxasi
 const apiAdmin = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://portfoliuzbackend-production.up.railway.app/'
 });
 
 // apiAdmin so'rovni yuborishdan oldin admin_token bormi tekshiradi
