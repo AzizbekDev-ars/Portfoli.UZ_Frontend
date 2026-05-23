@@ -128,7 +128,7 @@ const Register = () => {
             <GoogleLogin
               onSuccess={credentialResponse => {
                 googleLogin(credentialResponse.credential)
-                  .then(() => navigate('/dashboard'))
+                  .then(() => navigate('/select-design'))
                   .catch(err => setStatus('Error: ' + err.message));
               }}
               onError={() => setStatus('Google login failed')}
